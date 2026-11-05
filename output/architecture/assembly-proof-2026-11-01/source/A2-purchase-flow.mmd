@@ -1,0 +1,36 @@
+flowchart TD
+    intent["1. Buyer supplies outcome, budget and deadline"]
+    facts["2. AI proposes requirements and product facts<br/>retain provenance and critical unknowns"]
+    check["3. Deterministic configuration and readiness checks"]
+    valid{"Critical constraints satisfied?"}
+    revise["Show conflict / unknown / useful repair<br/>user or trusted evidence resolves it"]
+    offer["4. Freeze merchant offer and material manifest<br/>merchant / variant / quantity / total / currency / expiry"]
+    approve["5. Authenticated user accepts exact terms<br/>store consent and policy version"]
+    create["6. Persist order-create intent, then call PayPal<br/>stable create key; store provider order ID"]
+    buyerpp["7. Buyer approves the order at PayPal<br/>browser callback is a signal, not payment evidence"]
+    commit["8. Recheck material version and authority<br/>atomic budget / inventory reservation + capture intent"]
+    send["9. Worker dispatches capture outside DB transaction<br/>original order / body hash / stable capture key"]
+    result{"Trusted outcome?"}
+    unknown["Unknown: retain reservation and operation<br/>read back / exact retry under provider contract<br/>never mint replacement authority on timeout"]
+    declined["Terminal no-effect outcome<br/>record refusal; release only justified reservations<br/>show next action without fulfillment"]
+    confirmed["10. Record verified completed capture<br/>match merchant, amount and currency"]
+    outbox["11. Commit fulfillment outbox atomically<br/>unique purchase commitment + replay-safe consumer"]
+    task["12. Approved external setup task<br/>independent from financial success"]
+    intent --> facts
+    facts --> check
+    check --> valid
+    valid --> offer
+    offer --> approve
+    approve --> create
+    create --> buyerpp
+    buyerpp --> commit
+    commit --> send
+    send --> result
+    result -->|completed capture| confirmed
+    confirmed --> outbox
+    outbox --> task
+    valid -->|no| revise
+    revise -->|new version| facts
+    result -->|ambiguous| unknown
+    unknown -->|resource evidence| result
+    result -->|terminal no effect| declined

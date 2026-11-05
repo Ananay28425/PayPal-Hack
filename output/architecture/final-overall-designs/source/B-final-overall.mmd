@@ -1,0 +1,25 @@
+flowchart TD
+    ui["Buyer / merchant UI<br/>React + TypeScript<br/>AG Studio + Bryntum"]
+    edge["Managed edge + identity<br/>CDN / WAF / OIDC / quotas"]
+    evidence["Evidence and AI preparation<br/>Channel3 / Astropods / Kernel / Elastic<br/>scoped proposals; no payment authority"]
+    pp["PayPal<br/>buyer approval / capture / verification"]
+    task["Approved setup task<br/>Zapier; after verified payment"]
+    qa["Isolated Counterexample<br/>APIMatic development context<br/>Postman independent regressions"]
+    routing["Regional request routing<br/>current owner for money; local reads<br/>ownership metadata in financial SQL"]
+    cell_a["Region A: Render application cell<br/>same FastAPI code + bounded workers<br/>per-tenant admission and recovery capacity"]
+    cell_b["Region B: Render application cell<br/>same FastAPI code + bounded workers<br/>per-tenant admission and recovery capacity"]
+    sql["Managed distributed financial SQL<br/>explicit SERIALIZABLE transactions<br/>region-survival quorum: 3+ permitted DB regions<br/>versions / reservations / inbox / outbox"]
+    ui --> edge
+    edge -->|authenticated application requests| routing
+    routing -->|current owner| cell_a
+    routing -->|current owner| cell_b
+    cell_a -->|scoped preparation| evidence
+    cell_a -->|authoritative state| sql
+    cell_a -->|quota-limited operations| pp
+    cell_a -.->|approved downstream job| task
+    cell_b -->|scoped preparation| evidence
+    cell_b -->|authoritative state| sql
+    cell_b -->|quota-limited operations| pp
+    cell_b -.->|approved downstream job| task
+    pp -.->|verified ingress routing| routing
+    qa -.->|isolated release tests| cell_a

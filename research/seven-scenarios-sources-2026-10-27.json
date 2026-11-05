@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "id": "architecture-decision",
+      "title": "Which of the seven combinations is recommended?",
+      "assumptions": [
+        "Two developers are building for the November 12 submission deadline.",
+        "All ten optional sponsors are a user requirement.",
+        "A working general reliability engine has not been established by the supplied research."
+      ],
+      "queries": [
+        {
+          "id": "supplied-proposals",
+          "summary": "The recommendation favors an Assembly-led product with a bounded authorization module and isolated reliability harness. It is an engineering judgment about scope and coherence, not a measured prize forecast.",
+          "source": {
+            "label": "Three user-supplied architecture analyses",
+            "files": [
+              "Seven architecture strategies",
+              "Assembly Proof judge and company analysis",
+              "Assembly Proof language assessment"
+            ],
+            "caveats": [
+              "The supplied analyses are proposals, not implementation evidence.",
+              "Descriptions of individual judges do not establish their private preferences or hiring authority.",
+              "The language analysis proposes sharing production checks; independent test expectations must not rely solely on those same checks."
+            ]
+          }
+        },
+        {
+          "id": "official-scoring",
+          "source": {
+            "label": "PayPal hackathon rules",
+            "links": [
+              {
+                "label": "Official rules",
+                "href": "https://paypalaihackathon.devpost.com/rules"
+              }
+            ],
+            "caveats": [
+              "No observed judge scores or eligible final-project count supports a first-place probability."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "differentiation",
+      "title": "Which novelty claims survive the overlap check?",
+      "queries": [
+        {
+          "id": "existing-commerce-and-controls",
+          "summary": "Spokbee describes constrained configuration and checkout, Warden describes a PayPal agent firewall, and PayPal describes mandates and agentic-commerce services.",
+          "source": {
+            "label": "Published product and platform descriptions",
+            "links": [
+              {
+                "label": "Spokbee",
+                "href": "https://spokbee.ai/agent-commerce"
+              },
+              {
+                "label": "Warden",
+                "href": "https://devpost.com/software/warden-a-paypal-firewall-for-ai-agents"
+              },
+              {
+                "label": "PayPal AP2",
+                "href": "https://developer.paypal.com/community/blog/PayPal-Agent-Payments-Protocol/"
+              },
+              {
+                "label": "Agent Ready",
+                "href": "https://developer.paypal.com/agent-ready/overview"
+              }
+            ],
+            "caveats": [
+              "Public descriptions establish overlap; competitor implementations and event eligibility were not independently tested.",
+              "A shared record or hash alone does not establish global originality."
+            ]
+          }
+        },
+        {
+          "id": "authorization-research",
+          "summary": "The reviewed abstracts discuss authorization consistency across commit, recovery and service effects. AID-Guard directly overlaps exact-request and ambiguity controls.",
+          "source": {
+            "label": "Undermind abstracts and primary arXiv pages",
+            "links": [
+              {
+                "label": "AID-Guard",
+                "href": "https://arxiv.org/abs/2608.21159"
+              },
+              {
+                "label": "Formal analysis of agent payment protocols",
+                "href": "https://arxiv.org/abs/2609.00060"
+              }
+            ],
+            "caveats": [
+              "The papers were not replicated and their complete experiments were not reviewed.",
+              "Their results are not evidence that Assembly Proof is correct."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "platform-and-tools",
+      "title": "What supports a small PayPal and ten-sponsor architecture?",
+      "queries": [
+        {
+          "id": "official-tool-inventory",
+          "source": {
+            "label": "PayPal hackathon resources and sponsor briefs",
+            "links": [
+              {
+                "label": "Resource hub",
+                "href": "https://paypalaihackathon.devpost.com/resources"
+              },
+              {
+                "label": "AG Grid brief",
+                "href": "https://paypalaihackathon.devpost.com/details/aggrid"
+              },
+              {
+                "label": "Channel3 brief",
+                "href": "https://paypalaihackathon.devpost.com/details/channel3"
+              }
+            ],
+            "caveats": [
+              "All ten roles in the answer are proposed integrations; account access and working implementations are unverified.",
+              "Sponsor count has no separate weight under the overall judging rubric."
+            ]
+          }
+        },
+        {
+          "id": "sdk-and-access",
+          "source": {
+            "label": "Official PayPal SDK and Store Sync documentation",
+            "links": [
+              {
+                "label": "Python server SDK",
+                "href": "https://github.com/paypal/PayPal-Python-Server-SDK"
+              },
+              {
+                "label": "Store Sync eligibility",
+                "href": "https://developer.paypal.com/store-sync/overview"
+              }
+            ],
+            "caveats": [
+              "Store Sync requires supported merchant eligibility and onboarding; normal sandbox access does not establish access.",
+              "A sandbox merchant prototype does not establish worldwide readiness or measured loss reduction."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "evidence-limits",
+      "title": "What do current participation and model evidence establish?",
+      "queries": [
+        {
+          "id": "roster-and-count",
+          "summary": "The retrieved overview listed 22,384 participants and thirteen named judges. Registration count is distinct from eligible final submissions.",
+          "source": {
+            "label": "Official hackathon overview",
+            "links": [
+              {
+                "label": "Overview and judges",
+                "href": "https://paypalaihackathon.devpost.com/"
+              }
+            ],
+            "caveats": [
+              "The participant count is a retrieval snapshot and can change.",
+              "No source supports guaranteed internships, unanimous approval or loss-proof operation."
+            ]
+          }
+        },
+        {
+          "id": "structured-model-output",
+          "summary": "Hugging Face documents grammar-constrained generation. Schema conformance does not independently establish that extracted product facts are correct.",
+          "source": {
+            "label": "Hugging Face official documentation",
+            "links": [
+              {
+                "label": "Structured generation guidance",
+                "href": "https://huggingface.co/docs/text-generation-inference/en/conceptual/guidance"
+              }
+            ],
+            "caveats": [
+              "The Hugging Face connector returned UNAVAILABLE; official documentation was retrieved using Exa.",
+              "No model, dataset or deployed inference service was benchmarked for this recommendation.",
+              "Undermind returned research before reaching its free search limit, which resets October 27 at 16:30 IST."
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

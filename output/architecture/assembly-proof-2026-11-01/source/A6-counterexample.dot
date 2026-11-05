@@ -1,0 +1,27 @@
+digraph G {
+graph [rankdir=TB, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="A6 | Independent verification harness"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+"spec" [label="Reviewed business contract\nindependently labeled expected outcomes", shape=box, fillcolor="#EEE9FA"];
+"proposal" [label="Bounded scenario proposal\nAI or fixed templates\npinned prompt / seed / budget", shape=box, fillcolor="#FFF2D9"];
+"runner" [label="Typed legal-scenario runner\ncontrolled local scheduler\nno arbitrary generated code", shape=box, fillcolor="#EEE9FA"];
+"target" [label="Owned vulnerable / corrected fixture\nAssembly + PayGuard + merchant worker", shape=box, fillcolor="#E3EFF8"];
+"fault" [label="Local fault hooks\nresponse drop / crash / event redelivery\nconcurrent dispatch / stale offer", shape=box, fillcolor="#FCE8E6"];
+"provider" [label="Mode explicitly chosen\nsynthetic model / recorded adapter\nor real PayPal Sandbox", shape=box, fillcolor="#E3EFF8"];
+"trace" [label="Observed event history\nsource provenance and causal IDs", shape=box, fillcolor="#EEE9FA"];
+"oracle" [label="Independent oracle\nhistory properties + reference expectations\npass / fail / invalid / inconclusive", shape=box, fillcolor="#EEE9FA"];
+"reduce" [label="Trace reducer\npreserve prerequisites and same failure\nno global-minimum claim", shape=box, fillcolor="#EEE9FA"];
+"export" [label="Postman + runner manifest\ncode and contract versions\nfails before / passes after fix", shape=box, fillcolor="#E6F4EF"];
+"spec" -> "proposal" [label="", style=solid];
+"proposal" -> "runner" [label="", style=solid];
+"runner" -> "target" [label="", style=solid];
+"fault" -> "target" [label="", style=solid];
+"target" -> "provider" [label="", style=solid];
+"target" -> "trace" [label="", style=solid];
+"provider" -> "trace" [label="independent resource observations", style=solid];
+"spec" -> "oracle" [label="", style=solid];
+"trace" -> "oracle" [label="", style=solid];
+"oracle" -> "reduce" [label="verified failure", style=solid];
+"reduce" -> "runner" [label="controlled rerun", style=dashed];
+"reduce" -> "export" [label="", style=solid];
+}

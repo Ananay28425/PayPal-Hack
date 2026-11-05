@@ -1,0 +1,33 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="B6 | Regional security and operational isolation"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+subgraph cluster_0 { label="Public boundary"; fontsize=14; color="#CBDCE6"; style="rounded";
+"edge" [label="Public edge\nWAF / auth / abuse prevention\nper-tenant and per-action quotas", shape=box, fillcolor="#FFFFFF"];
+}
+subgraph cluster_1 { label="Service identity boundary"; fontsize=14; color="#CBDCE6"; style="rounded";
+"domain" [label="Domain cells\nobject and field authorization\ntenant-scoped commands", shape=box, fillcolor="#E3EFF8"];
+}
+subgraph cluster_2 { label="Financial boundary"; fontsize=14; color="#CBDCE6"; style="rounded";
+"money" [label="Payment egress\nleast privilege / rotating secrets\nallowlisted destinations / current epoch", shape=box, fillcolor="#E3EFF8"];
+"sql" [label="Quorum financial SQL\nstrict state reads / encrypted transport\nkey and data residency policy", shape=cylinder, fillcolor="#E3EFF8"];
+}
+subgraph cluster_3 { label="Lower-trust compute"; fontsize=14; color="#CBDCE6"; style="rounded";
+"ai" [label="AI / evidence workers\nno financial credentials\noutput validation / SSRF defense", shape=box, fillcolor="#FFF2D9"];
+"tests" [label="Counterexample cells\nseparate identities and databases\nproduction endpoints blocked", shape=box, fillcolor="#EEE9FA"];
+}
+"ops" [label="Operator / release control\nMFA + privileged approval\nsigned artifacts / dependency inventory", shape=box, fillcolor="#EEE9FA"];
+"telemetry" [label="Redacted traces and security events\nseparate access-controlled audit sink\nimmutable retention only where supported", shape=box, fillcolor="#E6F4EF"];
+"backup" [label="Encrypted backups / restore drills\nkey access and deletion policy\nquorum replication does not replace backups", shape=box, fillcolor="#E6F4EF"];
+"response" [label="Incident response\nkill financial dispatch / isolate tenant\nrotate keys / investigate / reconcile", shape=box, fillcolor="#FCE8E6"];
+"edge" -> "domain" [label="", style=solid];
+"domain" -> "money" [label="", style=solid];
+"domain" -> "sql" [label="", style=solid];
+"ai" -> "domain" [label="typed proposed data", style=solid];
+"ops" -> "domain" [label="reviewed release", style=dashed];
+"domain" -> "telemetry" [label="redacted events", style=dashed];
+"money" -> "telemetry" [label="operation evidence", style=dashed];
+"sql" -> "backup" [label="encrypted backup", style=dashed];
+"telemetry" -> "response" [label="alerts", style=dashed];
+"response" -> "money" [label="scoped stop control", style=solid];
+}

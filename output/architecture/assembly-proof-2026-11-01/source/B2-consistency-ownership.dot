@@ -1,0 +1,22 @@
+digraph G {
+graph [rankdir=TB, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="B2 | Consistency, budgets and ownership"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+"command" [label="Authenticated financial command\nmerchant + purchase + authority scope", shape=box, fillcolor="#FFFFFF"];
+"owner" [label="Resolve authority owner\ntenant / budget / cell / epoch", shape=box, fillcolor="#E3EFF8"];
+"quorum" [label="Current owner and quorum reachable?", shape=diamond, fillcolor="#E3EFF8"];
+"tx" [label="Short SERIALIZABLE transaction\ncheck material version + live policy\nreserve budget + unique operation + outbox", shape=box, fillcolor="#E3EFF8"];
+"reject" [label="Pause financial command\n503 / explicit pending\nnever authorize from stale cache", shape=box, fillcolor="#FCE8E6"];
+"adapter" [label="Commit first; call PayPal afterward\nfixed operation key and body hash\nretry DB-only code separately", shape=box, fillcolor="#E3EFF8"];
+"budget" [label="One owner for each shared budget\nco-locate budget and purchases\nno eventually consistent global spend counter", shape=box, fillcolor="#E3EFF8"];
+"browse" [label="Browsing / search\nregional cache and projections\nshow evidence version and age", shape=box, fillcolor="#E6F4EF"];
+"partition" [label="Network partition\nmajority may progress\nminority cannot dispatch", shape=box, fillcolor="#FCE8E6"];
+"command" -> "owner" [label="", style=solid];
+"owner" -> "quorum" [label="", style=solid];
+"quorum" -> "tx" [label="yes", style=solid];
+"quorum" -> "reject" [label="no", style=solid];
+"budget" -> "tx" [label="same authority scope", style=solid];
+"tx" -> "adapter" [label="durable intent", style=solid];
+"partition" -> "quorum" [label="financial consistency first", style=solid];
+"partition" -> "browse" [label="available with bounded staleness", style=dashed];
+}

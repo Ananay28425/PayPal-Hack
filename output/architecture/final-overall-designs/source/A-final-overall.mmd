@@ -1,0 +1,20 @@
+flowchart TD
+    ui["Buyer / merchant UI<br/>React + TypeScript<br/>AG Studio + Bryntum"]
+    edge["Managed edge + identity<br/>CDN / WAF / OIDC / quotas"]
+    evidence["Evidence and AI preparation<br/>Channel3 / Astropods / Kernel / Elastic<br/>scoped proposals; no payment authority"]
+    pp["PayPal<br/>buyer approval / capture / verification"]
+    task["Approved setup task<br/>Zapier; after verified payment"]
+    qa["Isolated Counterexample<br/>APIMatic development context<br/>Postman independent regressions"]
+    app["One FastAPI application on Render<br/>Assembly checks + PayGuard authority<br/>versioned offers / approvals / webhook ingress"]
+    sql["Managed PostgreSQL<br/>primary + synchronous AZ standby<br/>purchases / reservations / inbox / outbox"]
+    worker["One worker service on Render<br/>separate bounded job pools<br/>payment dispatch / reconciliation / follow-through"]
+    ui --> edge
+    edge --> app
+    app -->|short transactions| sql
+    app -->|prepare| evidence
+    sql -.->|durable jobs| worker
+    worker -->|stable operation identity| pp
+    pp -.->|signed webhook| app
+    worker -->|confirmed / unknown outcome| sql
+    worker -.->|explicit consent| task
+    qa -.->|owned test environment| app

@@ -1,0 +1,26 @@
+flowchart TD
+    tenant["TENANT / ACTOR / POLICY<br/>tenant_id + actor_id + policy_version"]
+    config["CONFIGURATION_VERSION<br/>requirements / accepted facts / rule results"]
+    evidence["EVIDENCE<br/>source / exact variant / retrieved_at / digest"]
+    offer["OFFER_VERSION<br/>canonical material manifest / expiry<br/>amount_minor NUMERIC(38,0) + currency + scale"]
+    approval["APPROVAL<br/>actor / offer_version / policy_version<br/>accepted_at / revoked_at / expires_at"]
+    purchase["PURCHASE<br/>business_intent_id UNIQUE per tenant<br/>current operation / committed manifest"]
+    budget["BUDGET_RESERVATION<br/>policy scope + operation identity<br/>no release on timeout alone"]
+    inventory["INVENTORY_RESERVATION<br/>merchant SKU + quantity + operation<br/>reserve stock atomically; retain while ambiguous"]
+    operation["PAYMENT_OPERATION<br/>kind / request_key / body_hash / state<br/>provider_order_id / capture_id / version"]
+    inbox["PROVIDER_INBOX<br/>merchant_app + event_id UNIQUE<br/>signature result / raw payload reference"]
+    outbox["OUTBOX + EFFECT_COMMITMENT<br/>purchase + effect_kind UNIQUE<br/>delivery attempts / remote receipt ID"]
+    audit["AUDIT / OBSERVATIONS<br/>append-only events / rule versions<br/>redacted payload reference + correlation IDs"]
+    test["TEST_RUN + SCENARIO<br/>code revision / independent oracle version<br/>synthetic or real-sandbox provenance"]
+    tenant -->|1 : many| config
+    config -->|many : many via fact refs| evidence
+    config -->|1 : many| offer
+    offer -->|1 : many| approval
+    approval -->|accepted authority| purchase
+    purchase -->|1 : many operation kinds| operation
+    purchase -->|reservations| budget
+    purchase -->|stock commitments| inventory
+    operation -->|correlated provider evidence| inbox
+    operation -->|atomic result + outbox| outbox
+    operation -->|1 : many| audit
+    test -->|isolated evidence IDs| audit

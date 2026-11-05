@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Assembly Proof">
+  <rect width="64" height="64" rx="8" fill="#001435"/>
+  <path d="M13 47 27 16h10l14 31H41l-3-7H26l-3 7H13Zm17-16h5l-2.5-7-2.5 7Z" fill="#60cdff"/>
+  <rect x="44" y="11" width="9" height="9" fill="#ffd140"/>
+</svg>

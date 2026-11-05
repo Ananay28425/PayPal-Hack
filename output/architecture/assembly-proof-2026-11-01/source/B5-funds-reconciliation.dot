@@ -1,0 +1,26 @@
+digraph G {
+graph [rankdir=TB, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="B5 | Funds boundary and reconciliation"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+"payer" [label="Buyer / payment method", shape=box, fillcolor="#FFFFFF"];
+"payee" [label="Participating merchant", shape=box, fillcolor="#FFFFFF"];
+"pp" [label="PayPal payment / settlement systems\nactual money movement and provider ledger", shape=box, fillcolor="#E3EFF8"];
+"app" [label="Assembly Proof\nnoncustodial purchase authority\namount + currency + provider IDs", shape=box, fillcolor="#E3EFF8"];
+"capture" [label="Capture observations\ncompleted / pending / refused / unknown", shape=box, fillcolor="#E3EFF8"];
+"refund" [label="Separate refund operations\nsource capture + operation ID\npartial and pending amounts tracked", shape=box, fillcolor="#E3EFF8"];
+"recon" [label="Reconciliation worker\nprovider facts vs application records\nexceptions retained and assigned", shape=box, fillcolor="#E3EFF8"];
+"projection" [label="Merchant financial projection\nconfirmed captured / refunded amounts\nnot a spendable wallet balance", shape=box, fillcolor="#E6F4EF"];
+"currency" [label="Money representation\ninteger minor units + ISO currency + scale\nchecked bounds; no float; no implicit FX", shape=box, fillcolor="#FFFFFF"];
+"custody" [label="If customer-fund custody is required\nseparate regulated product, ledger, treasury\nand safeguarding architecture required", shape=box, fillcolor="#FCE8E6"];
+"payer" -> "pp" [label="payment rail", style=solid];
+"pp" -> "payee" [label="settlement per provider terms", style=solid];
+"app" -> "pp" [label="approved operations", style=solid];
+"pp" -> "capture" [label="resource evidence", style=dashed];
+"app" -> "refund" [label="explicit approved refund", style=solid];
+"refund" -> "pp" [label="", style=solid];
+"capture" -> "recon" [label="", style=solid];
+"refund" -> "recon" [label="", style=solid];
+"recon" -> "projection" [label="", style=solid];
+"currency" -> "app" [label="validated amount model", style=solid];
+"custody" -> "app" [label="outside current scope", style=dashed];
+}

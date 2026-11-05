@@ -1,0 +1,22 @@
+{
+  "scope": "Authored synthetic in-memory model; no PayPal, AI, sponsors, network or concurrent processes",
+  "original_event_count": 14,
+  "reduced_event_count": 6,
+  "reduction_attempts": 41,
+  "reduced_trace": [
+    "select",
+    "approve",
+    "create",
+    "capture",
+    "receive",
+    "duplicate"
+  ],
+  "buggy_fulfillments": 2,
+  "corrected_fulfillments": 1,
+  "buggy_violations": [
+    "DUPLICATE_FULFILLMENT"
+  ],
+  "corrected_violations": [],
+  "identical_local_replays": 10,
+  "limitation": "The fixed in-memory set is not durable or concurrency safe; a real implementation needs a database uniqueness rule and an idempotent fulfillment integration. No discovery, generalization or production claim."
+}

@@ -1,0 +1,37 @@
+digraph G {
+graph [rankdir=TB, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="A5 | Trust and authority boundaries"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+subgraph cluster_0 { label="Internet-facing boundary"; fontsize=14; color="#CBDCE6"; style="rounded";
+"web" [label="Public edge\nWAF / request limits / CSRF / CSP", shape=box, fillcolor="#FFFFFF"];
+}
+subgraph cluster_1 { label="Trusted financial boundary"; fontsize=14; color="#CBDCE6"; style="rounded";
+"auth" [label="Domain authorization\nobject + property + function checks\ntenant-scoped queries and RLS defense", shape=box, fillcolor="#E3EFF8"];
+"policy" [label="PayGuard\nversion-bound approval\nbudget / expiry / material-term checks", shape=box, fillcolor="#E3EFF8"];
+"egress" [label="Payment adapter / secrets\nfixed PayPal hosts and scoped credentials\nno model or test-runtime access", shape=box, fillcolor="#E3EFF8"];
+"vault" [label="Secrets manager / KMS\nrotation / access audit", shape=box, fillcolor="#E3EFF8"];
+"db" [label="Authoritative SQL\nleast-privilege roles / encryption\nbackup and restore checks", shape=cylinder, fillcolor="#E3EFF8"];
+}
+subgraph cluster_2 { label="Untrusted evidence boundary"; fontsize=14; color="#CBDCE6"; style="rounded";
+"untrusted" [label="Product pages / API output / uploads\nallowlisted acquisition + size limits\nSSRF defenses and malware checks", shape=box, fillcolor="#FCE8E6"];
+"model" [label="Astropods model stage\nstructured proposals only\nno credentials or arbitrary execution", shape=box, fillcolor="#FFF2D9"];
+"validator" [label="Fact and constraint validation\ncritical unknowns stay unresolved\naccepted evidence retains provenance", shape=box, fillcolor="#FFF2D9"];
+}
+"human" [label="Buyer / merchant / operator\nOIDC session; step-up for sensitive roles", shape=box, fillcolor="#FFFFFF"];
+"pp" [label="PayPal\nprovider authentication + payment", shape=box, fillcolor="#FFFFFF"];
+"hook" [label="Webhook verifier\nraw bytes / app binding / inbox dedupe", shape=box, fillcolor="#E3EFF8"];
+"test" [label="Counterexample environment\nseparate secrets / DB / namespace\nsandbox-only endpoint policy", shape=box, fillcolor="#EEE9FA"];
+"human" -> "web" [label="", style=solid];
+"web" -> "auth" [label="", style=solid];
+"auth" -> "policy" [label="", style=solid];
+"policy" -> "db" [label="", style=solid];
+"policy" -> "egress" [label="approved durable operation", style=solid];
+"vault" -> "egress" [label="scoped secret", style=solid];
+"egress" -> "pp" [label="", style=solid];
+"untrusted" -> "model" [label="data only", style=solid];
+"model" -> "validator" [label="", style=solid];
+"validator" -> "auth" [label="proposed facts, never permission", style=solid];
+"pp" -> "hook" [label="signed event", style=dashed];
+"hook" -> "db" [label="verified durable inbox", style=solid];
+"test" -> "web" [label="owned test target only", style=dashed];
+}

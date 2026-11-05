@@ -1,0 +1,18 @@
+{
+  "status": "Illustrative arithmetic, not measured or promised capacity",
+  "inputs": {
+    "payments": 1000000000,
+    "year_days": 365,
+    "hypothetical_peak_multiplier": 20
+  },
+  "results": {
+    "one_billion_per_year_average_per_second": "31.70979198376458650431253171",
+    "one_billion_per_day_average_per_second": "11574.07407407407407407407407",
+    "twenty_times_day_average_per_second": "231481.4814814814814814814815"
+  },
+  "limits": [
+    "No actual traffic, provider quota or safe per-cell capacity was measured.",
+    "Provider API calls per payment are separate from payment count.",
+    "Registered users do not establish concurrent load."
+  ]
+}

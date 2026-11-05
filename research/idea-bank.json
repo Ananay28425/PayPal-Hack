@@ -1,0 +1,1490 @@
+{
+  "as_of": "2026-10-23",
+  "scope": "100 unvalidated product hypotheses across 25 domains",
+  "ideas": [
+    {
+      "id": "I001",
+      "domain": "Agent authority",
+      "name": "Exact purchase consent",
+      "hypothesis": "Bind approval to merchant, items, currency, total and expiry; reject a changed cart.",
+      "ai_role": "Compile user intent into a reviewed policy",
+      "paypal_path": "Orders, Payments, restricted MCP tools",
+      "main_constraint": "Existing mandates and payment firewalls create heavy overlap",
+      "source_ids": [
+        "S04",
+        "S05",
+        "S08",
+        "S13"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I002",
+      "domain": "Agent authority",
+      "name": "Delegation chain inspector",
+      "hypothesis": "Show which human or service delegated each capability; refuse scope amplification.",
+      "ai_role": "Compile user intent into a reviewed policy",
+      "paypal_path": "Orders, Payments, restricted MCP tools",
+      "main_constraint": "Existing mandates and payment firewalls create heavy overlap",
+      "source_ids": [
+        "S04",
+        "S05",
+        "S08",
+        "S13"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I003",
+      "domain": "Agent authority",
+      "name": "Revocation-aware agent checkout",
+      "hypothesis": "Cancel unused local authority across running jobs when a user revokes a mission.",
+      "ai_role": "Compile user intent into a reviewed policy",
+      "paypal_path": "Orders, Payments, restricted MCP tools",
+      "main_constraint": "Existing mandates and payment firewalls create heavy overlap",
+      "source_ids": [
+        "S04",
+        "S05",
+        "S08",
+        "S13"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I004",
+      "domain": "Agent authority",
+      "name": "Commercial terms diff",
+      "hypothesis": "Identify changed delivery, cancellation or renewal terms before asking for fresh approval.",
+      "ai_role": "Compile user intent into a reviewed policy",
+      "paypal_path": "Orders, Payments, restricted MCP tools",
+      "main_constraint": "Existing mandates and payment firewalls create heavy overlap",
+      "source_ids": [
+        "S04",
+        "S05",
+        "S08",
+        "S13"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I005",
+      "domain": "Agent coordination",
+      "name": "RecoverPlan",
+      "hypothesis": "Repair a partially completed multi-purchase mission within budget, deadline and accepted-loss limits.",
+      "ai_role": "Construct dependencies and propose recovery alternatives",
+      "paypal_path": "Orders, authorizations, captures, refunds and webhooks",
+      "main_constraint": "Saga middleware already exists; distinguish business-goal recovery",
+      "source_ids": [
+        "S11",
+        "S19",
+        "S20",
+        "S21"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I006",
+      "domain": "Agent coordination",
+      "name": "Shared mission commitment ledger",
+      "hypothesis": "Reserve one organization budget across several agents before any creates an obligation.",
+      "ai_role": "Construct dependencies and propose recovery alternatives",
+      "paypal_path": "Orders, authorizations, captures, refunds and webhooks",
+      "main_constraint": "Saga middleware already exists; distinguish business-goal recovery",
+      "source_ids": [
+        "S11",
+        "S19",
+        "S20",
+        "S21"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I007",
+      "domain": "Agent coordination",
+      "name": "Irreversible action planner",
+      "hypothesis": "Sequence dependent purchases so irreversible commitments happen only when prerequisites hold.",
+      "ai_role": "Construct dependencies and propose recovery alternatives",
+      "paypal_path": "Orders, authorizations, captures, refunds and webhooks",
+      "main_constraint": "Saga middleware already exists; distinguish business-goal recovery",
+      "source_ids": [
+        "S11",
+        "S19",
+        "S20",
+        "S21"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I008",
+      "domain": "Agent coordination",
+      "name": "Mission cancellation desk",
+      "hypothesis": "Coordinate merchant-permitted cancellation, void and refund requests; keep unresolved cases visible.",
+      "ai_role": "Construct dependencies and propose recovery alternatives",
+      "paypal_path": "Orders, authorizations, captures, refunds and webhooks",
+      "main_constraint": "Saga middleware already exists; distinguish business-goal recovery",
+      "source_ids": [
+        "S11",
+        "S19",
+        "S20",
+        "S21"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I009",
+      "domain": "Paid AI services",
+      "name": "ToolMeter",
+      "hypothesis": "Aggregate signed service-usage records into an approved PayPal invoice with spending caps.",
+      "ai_role": "Select tools and map task outcomes to metered service evidence",
+      "paypal_path": "Invoicing, Orders, Subscriptions; optional separate PYUSD testnet",
+      "main_constraint": "Existing machine-payment and usage-billing products; do not imply cost-free micropayments",
+      "source_ids": [
+        "S04",
+        "S23",
+        "S29"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I010",
+      "domain": "Paid AI services",
+      "name": "Data quality purchase contract",
+      "hypothesis": "Buy a dataset subject to explicit schema and coverage checks, with a human acceptance gate.",
+      "ai_role": "Select tools and map task outcomes to metered service evidence",
+      "paypal_path": "Invoicing, Orders, Subscriptions; optional separate PYUSD testnet",
+      "main_constraint": "Existing machine-payment and usage-billing products; do not imply cost-free micropayments",
+      "source_ids": [
+        "S04",
+        "S23",
+        "S29"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I011",
+      "domain": "Paid AI services",
+      "name": "Compute run acceptance",
+      "hypothesis": "Link an inference or training run receipt to a payment and verify agreed output checks.",
+      "ai_role": "Select tools and map task outcomes to metered service evidence",
+      "paypal_path": "Invoicing, Orders, Subscriptions; optional separate PYUSD testnet",
+      "main_constraint": "Existing machine-payment and usage-billing products; do not imply cost-free micropayments",
+      "source_ids": [
+        "S04",
+        "S23",
+        "S29"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I012",
+      "domain": "Paid AI services",
+      "name": "Paid API substitution planner",
+      "hypothesis": "Choose a replacement paid API after an outage while preserving task quality and remaining budget.",
+      "ai_role": "Select tools and map task outcomes to metered service evidence",
+      "paypal_path": "Invoicing, Orders, Subscriptions; optional separate PYUSD testnet",
+      "main_constraint": "Existing machine-payment and usage-billing products; do not imply cost-free micropayments",
+      "source_ids": [
+        "S04",
+        "S23",
+        "S29"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I013",
+      "domain": "Payment reliability",
+      "name": "Unknown capture investigator",
+      "hypothesis": "Resolve a lost capture response before deciding whether any retry is safe.",
+      "ai_role": "Investigate evidence and propose typed recovery actions",
+      "paypal_path": "Orders, Payments, Request-Id, webhooks",
+      "main_constraint": "Ordinary idempotency is existing PayPal functionality, not an invention",
+      "source_ids": [
+        "S10",
+        "S11",
+        "S12",
+        "S18"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I014",
+      "domain": "Payment reliability",
+      "name": "Fulfilment gap repair",
+      "hypothesis": "Find paid-but-unfulfilled orders and resume the merchant workflow without charging again.",
+      "ai_role": "Investigate evidence and propose typed recovery actions",
+      "paypal_path": "Orders, Payments, Request-Id, webhooks",
+      "main_constraint": "Ordinary idempotency is existing PayPal functionality, not an invention",
+      "source_ids": [
+        "S10",
+        "S11",
+        "S12",
+        "S18"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I015",
+      "domain": "Payment reliability",
+      "name": "Webhook incident desk",
+      "hypothesis": "Explain missing, duplicated or reordered events using verified records and replay-safe state.",
+      "ai_role": "Investigate evidence and propose typed recovery actions",
+      "paypal_path": "Orders, Payments, Request-Id, webhooks",
+      "main_constraint": "Ordinary idempotency is existing PayPal functionality, not an invention",
+      "source_ids": [
+        "S10",
+        "S11",
+        "S12",
+        "S18"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I016",
+      "domain": "Payment reliability",
+      "name": "Refund completion watcher",
+      "hypothesis": "Distinguish requested, pending, failed and completed refunds and propose the next permitted step.",
+      "ai_role": "Investigate evidence and propose typed recovery actions",
+      "paypal_path": "Orders, Payments, Request-Id, webhooks",
+      "main_constraint": "Ordinary idempotency is existing PayPal functionality, not an invention",
+      "source_ids": [
+        "S10",
+        "S11",
+        "S12",
+        "S18"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I017",
+      "domain": "Developer infrastructure",
+      "name": "Payment workflow conformance lab",
+      "hypothesis": "Compare a merchant integration against a pinned lifecycle contract and reproducible traces.",
+      "ai_role": "Generate tests, identify integration misuse and summarize counterexamples",
+      "paypal_path": "Sandbox APIs, OpenAPI, Postman, restricted MCP",
+      "main_constraint": "APIMatic, official tooling and public adversarial harnesses already cover parts",
+      "source_ids": [
+        "S03",
+        "S04",
+        "S06",
+        "S14"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I018",
+      "domain": "Developer infrastructure",
+      "name": "AI payment regression testing",
+      "hypothesis": "Replay held-out semantic and stateful cases when a model, prompt or tool schema changes.",
+      "ai_role": "Generate tests, identify integration misuse and summarize counterexamples",
+      "paypal_path": "Sandbox APIs, OpenAPI, Postman, restricted MCP",
+      "main_constraint": "APIMatic, official tooling and public adversarial harnesses already cover parts",
+      "source_ids": [
+        "S03",
+        "S04",
+        "S06",
+        "S14"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I019",
+      "domain": "Developer infrastructure",
+      "name": "Migration evidence assistant",
+      "hypothesis": "Map legacy payment behavior to Orders v2 and validate approval, capture and webhook semantics.",
+      "ai_role": "Generate tests, identify integration misuse and summarize counterexamples",
+      "paypal_path": "Sandbox APIs, OpenAPI, Postman, restricted MCP",
+      "main_constraint": "APIMatic, official tooling and public adversarial harnesses already cover parts",
+      "source_ids": [
+        "S03",
+        "S04",
+        "S06",
+        "S14"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I020",
+      "domain": "Developer infrastructure",
+      "name": "Minimal failing payment trace",
+      "hypothesis": "Reduce an integration incident to the smallest reproducible sandbox sequence.",
+      "ai_role": "Generate tests, identify integration misuse and summarize counterexamples",
+      "paypal_path": "Sandbox APIs, OpenAPI, Postman, restricted MCP",
+      "main_constraint": "APIMatic, official tooling and public adversarial harnesses already cover parts",
+      "source_ids": [
+        "S03",
+        "S04",
+        "S06",
+        "S14"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I021",
+      "domain": "Merchant fraud",
+      "name": "Order review copilot",
+      "hypothesis": "Explain unusual order and delivery facts without making a definitive fraud accusation.",
+      "ai_role": "Extract evidence and rank cases for review",
+      "paypal_path": "Orders, shipment tracking, disputes, merchant order data",
+      "main_constraint": "No representative fraud labels; cannot claim production fraud detection",
+      "source_ids": [
+        "S04",
+        "S07",
+        "S15"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I022",
+      "domain": "Merchant fraud",
+      "name": "Supplier payment change review",
+      "hypothesis": "Compare a claimed payee change with trusted supplier records and require independent confirmation.",
+      "ai_role": "Extract evidence and rank cases for review",
+      "paypal_path": "Orders, shipment tracking, disputes, merchant order data",
+      "main_constraint": "No representative fraud labels; cannot claim production fraud detection",
+      "source_ids": [
+        "S04",
+        "S07",
+        "S15"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I023",
+      "domain": "Merchant fraud",
+      "name": "Refund abuse case linker",
+      "hypothesis": "Link repeated refund narratives to existing orders while preserving legitimate customer appeals.",
+      "ai_role": "Extract evidence and rank cases for review",
+      "paypal_path": "Orders, shipment tracking, disputes, merchant order data",
+      "main_constraint": "No representative fraud labels; cannot claim production fraud detection",
+      "source_ids": [
+        "S04",
+        "S07",
+        "S15"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I024",
+      "domain": "Merchant fraud",
+      "name": "Account takeover response assistant",
+      "hypothesis": "Triage merchant-provided suspicious activity and prepare account-recovery steps, without platform privileges.",
+      "ai_role": "Extract evidence and rank cases for review",
+      "paypal_path": "Orders, shipment tracking, disputes, merchant order data",
+      "main_constraint": "No representative fraud labels; cannot claim production fraud detection",
+      "source_ids": [
+        "S04",
+        "S07",
+        "S15"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I025",
+      "domain": "Consumer scams",
+      "name": "Invoice scam explainer",
+      "hypothesis": "Explain suspicious invoice context before a user opens the payment flow.",
+      "ai_role": "Analyze social-engineering language and surface evidence",
+      "paypal_path": "App-controlled checkout or invoice review",
+      "main_constraint": "Cannot intercept arbitrary PayPal consumer transfers; sensitive false positives",
+      "source_ids": [
+        "S04",
+        "S13"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I026",
+      "domain": "Consumer scams",
+      "name": "Trusted contact approval",
+      "hypothesis": "Route an app-originated high-risk proposed payment to a trusted reviewer without exposing credentials.",
+      "ai_role": "Analyze social-engineering language and surface evidence",
+      "paypal_path": "App-controlled checkout or invoice review",
+      "main_constraint": "Cannot intercept arbitrary PayPal consumer transfers; sensitive false positives",
+      "source_ids": [
+        "S04",
+        "S13"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I027",
+      "domain": "Consumer scams",
+      "name": "Impersonation payment review",
+      "hypothesis": "Compare a claimed business identity with independently supplied trusted details.",
+      "ai_role": "Analyze social-engineering language and surface evidence",
+      "paypal_path": "App-controlled checkout or invoice review",
+      "main_constraint": "Cannot intercept arbitrary PayPal consumer transfers; sensitive false positives",
+      "source_ids": [
+        "S04",
+        "S13"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I028",
+      "domain": "Consumer scams",
+      "name": "Pressure-resistant checkout",
+      "hypothesis": "Slow coercive payment requests and show the user the actual recipient and obligation.",
+      "ai_role": "Analyze social-engineering language and surface evidence",
+      "paypal_path": "App-controlled checkout or invoice review",
+      "main_constraint": "Cannot intercept arbitrary PayPal consumer transfers; sensitive false positives",
+      "source_ids": [
+        "S04",
+        "S13"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I029",
+      "domain": "Disputes",
+      "name": "Evidence completeness desk",
+      "hypothesis": "Identify missing receipts, tracking and customer communications before a response is drafted.",
+      "ai_role": "Build cited evidence timelines and identify missing documents",
+      "paypal_path": "Disputes API, Orders, tracking",
+      "main_constraint": "Braintree automation, Chargeflow and multiple projects already exist",
+      "source_ids": [
+        "S07",
+        "S15",
+        "S16"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I030",
+      "domain": "Disputes",
+      "name": "Agent authorization evidence pack",
+      "hypothesis": "Connect what the buyer approved to what the agent ordered and what the merchant delivered.",
+      "ai_role": "Build cited evidence timelines and identify missing documents",
+      "paypal_path": "Disputes API, Orders, tracking",
+      "main_constraint": "Braintree automation, Chargeflow and multiple projects already exist",
+      "source_ids": [
+        "S07",
+        "S15",
+        "S16"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I031",
+      "domain": "Disputes",
+      "name": "Dispute deadline workflow",
+      "hypothesis": "Prioritize cases by confirmed deadline and available evidence instead of fabricated win probability.",
+      "ai_role": "Build cited evidence timelines and identify missing documents",
+      "paypal_path": "Disputes API, Orders, tracking",
+      "main_constraint": "Braintree automation, Chargeflow and multiple projects already exist",
+      "source_ids": [
+        "S07",
+        "S15",
+        "S16"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I032",
+      "domain": "Disputes",
+      "name": "Fair resolution planner",
+      "hypothesis": "Compare contesting, replacement and voluntary refund using policy and case facts.",
+      "ai_role": "Build cited evidence timelines and identify missing documents",
+      "paypal_path": "Disputes API, Orders, tracking",
+      "main_constraint": "Braintree automation, Chargeflow and multiple projects already exist",
+      "source_ids": [
+        "S07",
+        "S15",
+        "S16"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I033",
+      "domain": "Returns and refunds",
+      "name": "ReturnRouter",
+      "hypothesis": "Compare replacement, partial refund and return shipping while preserving the customer's stated preference.",
+      "ai_role": "Interpret return reasons and propose eligible replacements",
+      "paypal_path": "Payments refunds, tracking, merchant catalogue",
+      "main_constraint": "Crowded returns market; do not promise instant final refunds or force merchant refunds",
+      "source_ids": [
+        "S13",
+        "S17",
+        "S19"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I034",
+      "domain": "Returns and refunds",
+      "name": "Repair before return",
+      "hypothesis": "Offer a documented troubleshooting or repair path with an approved partial refund when appropriate.",
+      "ai_role": "Interpret return reasons and propose eligible replacements",
+      "paypal_path": "Payments refunds, tracking, merchant catalogue",
+      "main_constraint": "Crowded returns market; do not promise instant final refunds or force merchant refunds",
+      "source_ids": [
+        "S13",
+        "S17",
+        "S19"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I035",
+      "domain": "Returns and refunds",
+      "name": "Consolidated return planner",
+      "hypothesis": "Combine eligible returns into fewer shipments and show payment adjustments explicitly.",
+      "ai_role": "Interpret return reasons and propose eligible replacements",
+      "paypal_path": "Payments refunds, tracking, merchant catalogue",
+      "main_constraint": "Crowded returns market; do not promise instant final refunds or force merchant refunds",
+      "source_ids": [
+        "S13",
+        "S17",
+        "S19"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I036",
+      "domain": "Returns and refunds",
+      "name": "Refund promise reconciliation",
+      "hypothesis": "Compare support commitments with verified refund amounts, currencies and completion status.",
+      "ai_role": "Interpret return reasons and propose eligible replacements",
+      "paypal_path": "Payments refunds, tracking, merchant catalogue",
+      "main_constraint": "Crowded returns market; do not promise instant final refunds or force merchant refunds",
+      "source_ids": [
+        "S13",
+        "S17",
+        "S19"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I037",
+      "domain": "Accounts receivable",
+      "name": "Milestone invoice assistant",
+      "hypothesis": "Generate reviewable invoices from explicit agreed milestones and accepted work.",
+      "ai_role": "Extract scope and explain receivables",
+      "paypal_path": "Invoicing, Orders, webhooks",
+      "main_constraint": "Invoicing agents and contract-to-cash projects already exist",
+      "source_ids": [
+        "S04",
+        "S09"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I038",
+      "domain": "Accounts receivable",
+      "name": "Scope change billing",
+      "hypothesis": "Compare an agreed brief with requested changes and price approved extras.",
+      "ai_role": "Extract scope and explain receivables",
+      "paypal_path": "Invoicing, Orders, webhooks",
+      "main_constraint": "Invoicing agents and contract-to-cash projects already exist",
+      "source_ids": [
+        "S04",
+        "S09"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I039",
+      "domain": "Accounts receivable",
+      "name": "Receivables prioritizer",
+      "hypothesis": "Rank overdue invoices by actionable evidence and prepare human-approved reminders.",
+      "ai_role": "Extract scope and explain receivables",
+      "paypal_path": "Invoicing, Orders, webhooks",
+      "main_constraint": "Invoicing agents and contract-to-cash projects already exist",
+      "source_ids": [
+        "S04",
+        "S09"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I040",
+      "domain": "Accounts receivable",
+      "name": "Short payment resolver",
+      "hypothesis": "Explain why a payment does not satisfy an invoice, including fees, credits and agreed deductions.",
+      "ai_role": "Extract scope and explain receivables",
+      "paypal_path": "Invoicing, Orders, webhooks",
+      "main_constraint": "Invoicing agents and contract-to-cash projects already exist",
+      "source_ids": [
+        "S04",
+        "S09"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I041",
+      "domain": "Procurement and accounts payable",
+      "name": "Three-way match payment desk",
+      "hypothesis": "Compare a purchase order, delivery note and supplier invoice before payment.",
+      "ai_role": "Read purchase orders, delivery records and invoices",
+      "paypal_path": "Orders or sandbox Payouts after access validation",
+      "main_constraint": "Three-way-match and cash-cap demos already exist; merchant access is required",
+      "source_ids": [
+        "S04",
+        "S22"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I042",
+      "domain": "Procurement and accounts payable",
+      "name": "Supplier quote normalizer",
+      "hypothesis": "Compare package sizes, tax, delivery and payment terms before selecting a supplier.",
+      "ai_role": "Read purchase orders, delivery records and invoices",
+      "paypal_path": "Orders or sandbox Payouts after access validation",
+      "main_constraint": "Three-way-match and cash-cap demos already exist; merchant access is required",
+      "source_ids": [
+        "S04",
+        "S22"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I043",
+      "domain": "Procurement and accounts payable",
+      "name": "Discount deadline planner",
+      "hypothesis": "Select approved early payments without consuming money needed for earlier obligations.",
+      "ai_role": "Read purchase orders, delivery records and invoices",
+      "paypal_path": "Orders or sandbox Payouts after access validation",
+      "main_constraint": "Three-way-match and cash-cap demos already exist; merchant access is required",
+      "source_ids": [
+        "S04",
+        "S22"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I044",
+      "domain": "Procurement and accounts payable",
+      "name": "Substitution acceptance",
+      "hypothesis": "Detect changed supplier products or quantities and obtain approval before adjusted payment.",
+      "ai_role": "Read purchase orders, delivery records and invoices",
+      "paypal_path": "Orders or sandbox Payouts after access validation",
+      "main_constraint": "Three-way-match and cash-cap demos already exist; merchant access is required",
+      "source_ids": [
+        "S04",
+        "S22"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I045",
+      "domain": "Treasury and working capital",
+      "name": "ReservePilot",
+      "hypothesis": "Keep incoming funds, provider holds, internal buffers, refunds and committed supplier payments separate.",
+      "ai_role": "Extract obligations and propose cash-allocation plans",
+      "paypal_path": "PayPal reports, captures, refunds; optional Payouts",
+      "main_constraint": "Fresh balance and reserve visibility must be verified; never imply control over PayPal reserves",
+      "source_ids": [
+        "S24",
+        "S25",
+        "S26"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I046",
+      "domain": "Treasury and working capital",
+      "name": "Refund shock simulator",
+      "hypothesis": "Stress-test which approved payments remain affordable after a declared refund scenario.",
+      "ai_role": "Extract obligations and propose cash-allocation plans",
+      "paypal_path": "PayPal reports, captures, refunds; optional Payouts",
+      "main_constraint": "Fresh balance and reserve visibility must be verified; never imply control over PayPal reserves",
+      "source_ids": [
+        "S24",
+        "S25",
+        "S26"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I047",
+      "domain": "Treasury and working capital",
+      "name": "Obligation deadline calendar",
+      "hypothesis": "Explain upcoming cash obligations and propose approved deferrals without predicting guaranteed inflows.",
+      "ai_role": "Extract obligations and propose cash-allocation plans",
+      "paypal_path": "PayPal reports, captures, refunds; optional Payouts",
+      "main_constraint": "Fresh balance and reserve visibility must be verified; never imply control over PayPal reserves",
+      "source_ids": [
+        "S24",
+        "S25",
+        "S26"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I048",
+      "domain": "Treasury and working capital",
+      "name": "Capital lockup optimizer",
+      "hypothesis": "Sequence expiring authorizations and cancellable orders to reduce unnecessary committed capital.",
+      "ai_role": "Extract obligations and propose cash-allocation plans",
+      "paypal_path": "PayPal reports, captures, refunds; optional Payouts",
+      "main_constraint": "Fresh balance and reserve visibility must be verified; never imply control over PayPal reserves",
+      "source_ids": [
+        "S24",
+        "S25",
+        "S26"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I049",
+      "domain": "Cross-border and FX",
+      "name": "ClearFX",
+      "hypothesis": "Trace the invoice currency, payer quote, merchant receivable and refund currency across one payment.",
+      "ai_role": "Read contracts and explain currency and fee obligations",
+      "paypal_path": "Multi-currency Orders, Invoicing; FXaaS only if enabled",
+      "main_constraint": "FXaaS requires eligibility and contract onboarding; quotes are not trading APIs",
+      "source_ids": [
+        "S27",
+        "S28",
+        "S30"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I050",
+      "domain": "Cross-border and FX",
+      "name": "Quote expiry consent",
+      "hypothesis": "Detect an expired quote and request new approval when the economic terms change.",
+      "ai_role": "Read contracts and explain currency and fee obligations",
+      "paypal_path": "Multi-currency Orders, Invoicing; FXaaS only if enabled",
+      "main_constraint": "FXaaS requires eligibility and contract onboarding; quotes are not trading APIs",
+      "source_ids": [
+        "S27",
+        "S28",
+        "S30"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I051",
+      "domain": "Cross-border and FX",
+      "name": "Net receipt agreement",
+      "hypothesis": "Explain who bears conversion and fee differences before parties agree a payable amount.",
+      "ai_role": "Read contracts and explain currency and fee obligations",
+      "paypal_path": "Multi-currency Orders, Invoicing; FXaaS only if enabled",
+      "main_constraint": "FXaaS requires eligibility and contract onboarding; quotes are not trading APIs",
+      "source_ids": [
+        "S27",
+        "S28",
+        "S30"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I052",
+      "domain": "Cross-border and FX",
+      "name": "Cross-currency refund desk",
+      "hypothesis": "Reconcile original and refunded amounts without inventing an executable exchange rate.",
+      "ai_role": "Read contracts and explain currency and fee obligations",
+      "paypal_path": "Multi-currency Orders, Invoicing; FXaaS only if enabled",
+      "main_constraint": "FXaaS requires eligibility and contract onboarding; quotes are not trading APIs",
+      "source_ids": [
+        "S27",
+        "S28",
+        "S30"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I053",
+      "domain": "Accounting and reconciliation",
+      "name": "Invoice to settlement bridge",
+      "hypothesis": "Match invoice, capture, fee, refund and payout records with source citations.",
+      "ai_role": "Map ambiguous records and explain deterministic findings",
+      "paypal_path": "Transaction Search, balance reports, Orders and Payments",
+      "main_constraint": "PayPal accounting sync and reconciliation projects exist; reporting can lag",
+      "source_ids": [
+        "S18",
+        "S25",
+        "S31"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I054",
+      "domain": "Accounting and reconciliation",
+      "name": "Accounting exception inbox",
+      "hypothesis": "Cluster unmatched records and request the specific evidence needed to resolve each.",
+      "ai_role": "Map ambiguous records and explain deterministic findings",
+      "paypal_path": "Transaction Search, balance reports, Orders and Payments",
+      "main_constraint": "PayPal accounting sync and reconciliation projects exist; reporting can lag",
+      "source_ids": [
+        "S18",
+        "S25",
+        "S31"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I055",
+      "domain": "Accounting and reconciliation",
+      "name": "Duplicate expense review",
+      "hypothesis": "Link repeated receipts and payments before a bookkeeper approves corrections.",
+      "ai_role": "Map ambiguous records and explain deterministic findings",
+      "paypal_path": "Transaction Search, balance reports, Orders and Payments",
+      "main_constraint": "PayPal accounting sync and reconciliation projects exist; reporting can lag",
+      "source_ids": [
+        "S18",
+        "S25",
+        "S31"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I056",
+      "domain": "Accounting and reconciliation",
+      "name": "Close checklist assistant",
+      "hypothesis": "Prepare a reviewable period-close checklist without silently posting journals.",
+      "ai_role": "Map ambiguous records and explain deterministic findings",
+      "paypal_path": "Transaction Search, balance reports, Orders and Payments",
+      "main_constraint": "PayPal accounting sync and reconciliation projects exist; reporting can lag",
+      "source_ids": [
+        "S18",
+        "S25",
+        "S31"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I057",
+      "domain": "Subscriptions and recurring payments",
+      "name": "Renewal change consent",
+      "hypothesis": "Highlight material renewal terms or price changes before user approval.",
+      "ai_role": "Read plan changes and explain renewal obligations",
+      "paypal_path": "Merchant-owned Subscriptions, catalogue and webhooks",
+      "main_constraint": "Cannot manage every consumer subscription through merchant credentials",
+      "source_ids": [
+        "S32",
+        "S33"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I058",
+      "domain": "Subscriptions and recurring payments",
+      "name": "Subscription migration desk",
+      "hypothesis": "Plan a permitted same-product plan transition and verify resulting subscription state.",
+      "ai_role": "Read plan changes and explain renewal obligations",
+      "paypal_path": "Merchant-owned Subscriptions, catalogue and webhooks",
+      "main_constraint": "Cannot manage every consumer subscription through merchant credentials",
+      "source_ids": [
+        "S32",
+        "S33"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I059",
+      "domain": "Subscriptions and recurring payments",
+      "name": "Failed renewal recovery",
+      "hypothesis": "Explain supported recovery choices without bypassing funding-source or consent requirements.",
+      "ai_role": "Read plan changes and explain renewal obligations",
+      "paypal_path": "Merchant-owned Subscriptions, catalogue and webhooks",
+      "main_constraint": "Cannot manage every consumer subscription through merchant credentials",
+      "source_ids": [
+        "S32",
+        "S33"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I060",
+      "domain": "Subscriptions and recurring payments",
+      "name": "Entitlement payment reconciliation",
+      "hypothesis": "Detect where access and verified subscription state disagree.",
+      "ai_role": "Read plan changes and explain renewal obligations",
+      "paypal_path": "Merchant-owned Subscriptions, catalogue and webhooks",
+      "main_constraint": "Cannot manage every consumer subscription through merchant credentials",
+      "source_ids": [
+        "S32",
+        "S33"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I061",
+      "domain": "Marketplaces and gig work",
+      "name": "Task acceptance marketplace",
+      "hypothesis": "Tie an agreed acceptance checklist to a reviewed payment decision.",
+      "ai_role": "Match work, evidence and payment obligations",
+      "paypal_path": "Orders, Invoicing, Payouts; multiparty approval where needed",
+      "main_constraint": "Authorizations are not regulated escrow; onboarding and split settlement may be gated",
+      "source_ids": [
+        "S03",
+        "S19",
+        "S34"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I062",
+      "domain": "Marketplaces and gig work",
+      "name": "Marketplace exception resolver",
+      "hypothesis": "Explain mismatches between buyer payments, seller balances and platform obligations.",
+      "ai_role": "Match work, evidence and payment obligations",
+      "paypal_path": "Orders, Invoicing, Payouts; multiparty approval where needed",
+      "main_constraint": "Authorizations are not regulated escrow; onboarding and split settlement may be gated",
+      "source_ids": [
+        "S03",
+        "S19",
+        "S34"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I063",
+      "domain": "Marketplaces and gig work",
+      "name": "Gig earnings statement",
+      "hypothesis": "Turn completed-task and payment records into a cited statement with missing payments visible.",
+      "ai_role": "Match work, evidence and payment obligations",
+      "paypal_path": "Orders, Invoicing, Payouts; multiparty approval where needed",
+      "main_constraint": "Authorizations are not regulated escrow; onboarding and split settlement may be gated",
+      "source_ids": [
+        "S03",
+        "S19",
+        "S34"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I064",
+      "domain": "Marketplaces and gig work",
+      "name": "Royalty allocation review",
+      "hypothesis": "Extract an agreed revenue-share contract and validate allocations before payouts.",
+      "ai_role": "Match work, evidence and payment obligations",
+      "paypal_path": "Orders, Invoicing, Payouts; multiparty approval where needed",
+      "main_constraint": "Authorizations are not regulated escrow; onboarding and split settlement may be gated",
+      "source_ids": [
+        "S03",
+        "S19",
+        "S34"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I065",
+      "domain": "Identity and financial operations",
+      "name": "Onboarding completeness assistant",
+      "hypothesis": "Identify missing business documents and prepare a human-reviewed application packet.",
+      "ai_role": "Extract documents and explain missing evidence",
+      "paypal_path": "Merchant onboarding workflows and app permissions",
+      "main_constraint": "No privileged KYC, AML or sanctions determination; sensitive data and regional scope",
+      "source_ids": [
+        "S03",
+        "S04"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I066",
+      "domain": "Identity and financial operations",
+      "name": "Entity record reconciliation",
+      "hypothesis": "Link merchant-supplied entity records while requiring confirmation of uncertain matches.",
+      "ai_role": "Extract documents and explain missing evidence",
+      "paypal_path": "Merchant onboarding workflows and app permissions",
+      "main_constraint": "No privileged KYC, AML or sanctions determination; sensitive data and regional scope",
+      "source_ids": [
+        "S03",
+        "S04"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I067",
+      "domain": "Identity and financial operations",
+      "name": "Payment purpose evidence",
+      "hypothesis": "Attach a minimized purpose and source-document trail to an app payment.",
+      "ai_role": "Extract documents and explain missing evidence",
+      "paypal_path": "Merchant onboarding workflows and app permissions",
+      "main_constraint": "No privileged KYC, AML or sanctions determination; sensitive data and regional scope",
+      "source_ids": [
+        "S03",
+        "S04"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I068",
+      "domain": "Identity and financial operations",
+      "name": "Permission audit assistant",
+      "hypothesis": "Explain what each integration can do and recommend narrower app capabilities.",
+      "ai_role": "Extract documents and explain missing evidence",
+      "paypal_path": "Merchant onboarding workflows and app permissions",
+      "main_constraint": "No privileged KYC, AML or sanctions determination; sensitive data and regional scope",
+      "source_ids": [
+        "S03",
+        "S04"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I069",
+      "domain": "Accessibility and inclusion",
+      "name": "Screen-reader payment review",
+      "hypothesis": "Make recipient, amount, fees and approval state easy to verify without sight.",
+      "ai_role": "Translate and explain terms through supported interaction modes",
+      "paypal_path": "Accessible Orders or Invoicing checkout",
+      "main_constraint": "Voice-first shopping projects exist; evaluate comprehension and accessibility with users",
+      "source_ids": [
+        "S02",
+        "S04",
+        "S08"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I070",
+      "domain": "Accessibility and inclusion",
+      "name": "Low-literacy merchant assistant",
+      "hypothesis": "Explain invoices and refunds in plain language with confirmation of critical values.",
+      "ai_role": "Translate and explain terms through supported interaction modes",
+      "paypal_path": "Accessible Orders or Invoicing checkout",
+      "main_constraint": "Voice-first shopping projects exist; evaluate comprehension and accessibility with users",
+      "source_ids": [
+        "S02",
+        "S04",
+        "S08"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I071",
+      "domain": "Accessibility and inclusion",
+      "name": "Multilingual invoice acceptance",
+      "hypothesis": "Translate descriptions while preserving original currency, price and contractual terms.",
+      "ai_role": "Translate and explain terms through supported interaction modes",
+      "paypal_path": "Accessible Orders or Invoicing checkout",
+      "main_constraint": "Voice-first shopping projects exist; evaluate comprehension and accessibility with users",
+      "source_ids": [
+        "S02",
+        "S04",
+        "S08"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I072",
+      "domain": "Accessibility and inclusion",
+      "name": "Caregiver-supported purchase",
+      "hypothesis": "Support explicit roles and consent for app purchases without sharing account passwords.",
+      "ai_role": "Translate and explain terms through supported interaction modes",
+      "paypal_path": "Accessible Orders or Invoicing checkout",
+      "main_constraint": "Voice-first shopping projects exist; evaluate comprehension and accessibility with users",
+      "source_ids": [
+        "S02",
+        "S04",
+        "S08"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I073",
+      "domain": "Consumer financial organization",
+      "name": "Commitment budget",
+      "hypothesis": "Include already approved obligations in a user's view of money remaining.",
+      "ai_role": "Categorize records and explain commitments",
+      "paypal_path": "App payments, user-provided exports and subscriptions",
+      "main_constraint": "No arbitrary consumer-account scraping or universal read access",
+      "source_ids": [
+        "S04",
+        "S25",
+        "S32"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I074",
+      "domain": "Consumer financial organization",
+      "name": "Receipt bill splitting",
+      "hypothesis": "Read a receipt and propose shares, followed by separately approved supported payments.",
+      "ai_role": "Categorize records and explain commitments",
+      "paypal_path": "App payments, user-provided exports and subscriptions",
+      "main_constraint": "No arbitrary consumer-account scraping or universal read access",
+      "source_ids": [
+        "S04",
+        "S25",
+        "S32"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I075",
+      "domain": "Consumer financial organization",
+      "name": "Purchase affordability explainer",
+      "hypothesis": "Show the consequence of a proposed purchase under explicit user-provided budget assumptions.",
+      "ai_role": "Categorize records and explain commitments",
+      "paypal_path": "App payments, user-provided exports and subscriptions",
+      "main_constraint": "No arbitrary consumer-account scraping or universal read access",
+      "source_ids": [
+        "S04",
+        "S25",
+        "S32"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I076",
+      "domain": "Consumer financial organization",
+      "name": "Family purchase accountability",
+      "hypothesis": "Show who approved and received each app purchase under explicit family permissions.",
+      "ai_role": "Categorize records and explain commitments",
+      "paypal_path": "App payments, user-provided exports and subscriptions",
+      "main_constraint": "No arbitrary consumer-account scraping or universal read access",
+      "source_ids": [
+        "S04",
+        "S25",
+        "S32"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I077",
+      "domain": "Commerce discovery",
+      "name": "Compatibility-aware bundle",
+      "hypothesis": "Buy components only after checking their documented compatibility and complete bundle cost.",
+      "ai_role": "Find relevant products and explain constraint matches",
+      "paypal_path": "Channel3 or bounded catalogue plus Orders",
+      "main_constraint": "Shopping is heavily represented; catalogue data is untrusted and prices need revalidation",
+      "source_ids": [
+        "S03",
+        "S05",
+        "S08"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I078",
+      "domain": "Commerce discovery",
+      "name": "Repair-versus-replace purchase",
+      "hypothesis": "Compare a supported repair item with a replacement using transparent assumptions.",
+      "ai_role": "Find relevant products and explain constraint matches",
+      "paypal_path": "Channel3 or bounded catalogue plus Orders",
+      "main_constraint": "Shopping is heavily represented; catalogue data is untrusted and prices need revalidation",
+      "source_ids": [
+        "S03",
+        "S05",
+        "S08"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I079",
+      "domain": "Commerce discovery",
+      "name": "Landed-cost shopping",
+      "hypothesis": "Compare item, shipping and supplied taxes rather than ranking sticker price alone.",
+      "ai_role": "Find relevant products and explain constraint matches",
+      "paypal_path": "Channel3 or bounded catalogue plus Orders",
+      "main_constraint": "Shopping is heavily represented; catalogue data is untrusted and prices need revalidation",
+      "source_ids": [
+        "S03",
+        "S05",
+        "S08"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I080",
+      "domain": "Commerce discovery",
+      "name": "Accessible local merchant checkout",
+      "hypothesis": "Help a small merchant publish a usable catalogue and app-controlled checkout.",
+      "ai_role": "Find relevant products and explain constraint matches",
+      "paypal_path": "Channel3 or bounded catalogue plus Orders",
+      "main_constraint": "Shopping is heavily represented; catalogue data is untrusted and prices need revalidation",
+      "source_ids": [
+        "S03",
+        "S05",
+        "S08"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I081",
+      "domain": "Trade and logistics",
+      "name": "Delivery shortfall adjustment",
+      "hypothesis": "Compare agreed and documented received quantities before a payment adjustment.",
+      "ai_role": "Extract delivery and commercial terms from documents",
+      "paypal_path": "Invoicing, Orders, tracking and refunds",
+      "main_constraint": "Shipping evidence does not prove quality; no letter-of-credit or customs authority",
+      "source_ids": [
+        "S04",
+        "S19",
+        "S22"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I082",
+      "domain": "Trade and logistics",
+      "name": "Incoterm cost explainer",
+      "hypothesis": "Explain supplied responsibility and cost clauses for merchant review without giving binding legal advice.",
+      "ai_role": "Extract delivery and commercial terms from documents",
+      "paypal_path": "Invoicing, Orders, tracking and refunds",
+      "main_constraint": "Shipping evidence does not prove quality; no letter-of-credit or customs authority",
+      "source_ids": [
+        "S04",
+        "S19",
+        "S22"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I083",
+      "domain": "Trade and logistics",
+      "name": "Late delivery recovery",
+      "hypothesis": "Compare merchant-supported reshipment, replacement and refund alternatives against a customer deadline.",
+      "ai_role": "Extract delivery and commercial terms from documents",
+      "paypal_path": "Invoicing, Orders, tracking and refunds",
+      "main_constraint": "Shipping evidence does not prove quality; no letter-of-credit or customs authority",
+      "source_ids": [
+        "S04",
+        "S19",
+        "S22"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I084",
+      "domain": "Trade and logistics",
+      "name": "Shipment payment evidence chain",
+      "hypothesis": "Connect dispatch, delivery and payment records without treating tracking as proof of all obligations.",
+      "ai_role": "Extract delivery and commercial terms from documents",
+      "paypal_path": "Invoicing, Orders, tracking and refunds",
+      "main_constraint": "Shipping evidence does not prove quality; no letter-of-credit or customs authority",
+      "source_ids": [
+        "S04",
+        "S19",
+        "S22"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I085",
+      "domain": "Donations and community finance",
+      "name": "Aid invoice verification",
+      "hypothesis": "Match an approved aid budget with vendor invoices before a reviewer pays.",
+      "ai_role": "Match documented needs and explain allocation proposals",
+      "paypal_path": "Orders or donation checkout; approved Payouts where enabled",
+      "main_constraint": "Charity verification and custody are real dependencies; no fabricated impact evidence",
+      "source_ids": [
+        "S02",
+        "S03"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I086",
+      "domain": "Donations and community finance",
+      "name": "Restricted donation ledger",
+      "hypothesis": "Track donor-stated restrictions and flag incompatible allocation proposals.",
+      "ai_role": "Match documented needs and explain allocation proposals",
+      "paypal_path": "Orders or donation checkout; approved Payouts where enabled",
+      "main_constraint": "Charity verification and custody are real dependencies; no fabricated impact evidence",
+      "source_ids": [
+        "S02",
+        "S03"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I087",
+      "domain": "Donations and community finance",
+      "name": "Community purchase coordination",
+      "hypothesis": "Prepare a transparent shared purchase after contributions and approvals are confirmed.",
+      "ai_role": "Match documented needs and explain allocation proposals",
+      "paypal_path": "Orders or donation checkout; approved Payouts where enabled",
+      "main_constraint": "Charity verification and custody are real dependencies; no fabricated impact evidence",
+      "source_ids": [
+        "S02",
+        "S03"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I088",
+      "domain": "Donations and community finance",
+      "name": "Nonprofit payout evidence",
+      "hypothesis": "Link approved beneficiary disbursements with recipient confirmation and unresolved items.",
+      "ai_role": "Match documented needs and explain allocation proposals",
+      "paypal_path": "Orders or donation checkout; approved Payouts where enabled",
+      "main_constraint": "Charity verification and custody are real dependencies; no fabricated impact evidence",
+      "source_ids": [
+        "S02",
+        "S03"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I089",
+      "domain": "Credit and BNPL",
+      "name": "Repayment terms explainer",
+      "hypothesis": "Explain an offered financing schedule without inventing eligibility or promised approval.",
+      "ai_role": "Explain terms and build transparent affordability scenarios",
+      "paypal_path": "Pay Later presentment or approved merchant financing products",
+      "main_constraint": "No new underwriting model without representative data and legal authority",
+      "source_ids": [
+        "S03",
+        "S04"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I090",
+      "domain": "Credit and BNPL",
+      "name": "Merchant borrowing readiness",
+      "hypothesis": "Organize merchant-provided cash records and missing documents for an existing lender.",
+      "ai_role": "Explain terms and build transparent affordability scenarios",
+      "paypal_path": "Pay Later presentment or approved merchant financing products",
+      "main_constraint": "No new underwriting model without representative data and legal authority",
+      "source_ids": [
+        "S03",
+        "S04"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I091",
+      "domain": "Credit and BNPL",
+      "name": "Invoice financing evidence",
+      "hypothesis": "Detect conflicting invoice claims in a synthetic workflow; never offer unlicensed funding.",
+      "ai_role": "Explain terms and build transparent affordability scenarios",
+      "paypal_path": "Pay Later presentment or approved merchant financing products",
+      "main_constraint": "No new underwriting model without representative data and legal authority",
+      "source_ids": [
+        "S03",
+        "S04"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I092",
+      "domain": "Credit and BNPL",
+      "name": "BNPL reconciliation desk",
+      "hypothesis": "Explain merchant-side transaction records and adjustments around existing Pay Later payments.",
+      "ai_role": "Explain terms and build transparent affordability scenarios",
+      "paypal_path": "Pay Later presentment or approved merchant financing products",
+      "main_constraint": "No new underwriting model without representative data and legal authority",
+      "source_ids": [
+        "S03",
+        "S04"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I093",
+      "domain": "Tax, healthcare, education and insurance",
+      "name": "Education fee reconciliation",
+      "hypothesis": "Explain instalments, concessions and refunds against a school's verified billing records.",
+      "ai_role": "Extract statements and explain documented billing discrepancies",
+      "paypal_path": "Invoices, Orders or Subscriptions for bounded payments",
+      "main_constraint": "Domain-specific privacy, tax and insurance rules; no diagnosis, legal filing or underwriting",
+      "source_ids": [
+        "S03",
+        "S04"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I094",
+      "domain": "Tax, healthcare, education and insurance",
+      "name": "Healthcare billing clarification",
+      "hypothesis": "Identify duplicated or inconsistent billing lines before a patient approves payment.",
+      "ai_role": "Extract statements and explain documented billing discrepancies",
+      "paypal_path": "Invoices, Orders or Subscriptions for bounded payments",
+      "main_constraint": "Domain-specific privacy, tax and insurance rules; no diagnosis, legal filing or underwriting",
+      "source_ids": [
+        "S03",
+        "S04"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I095",
+      "domain": "Tax, healthcare, education and insurance",
+      "name": "Insurance premium evidence",
+      "hypothesis": "Compare a supplied policy schedule with recurring payment records and flag changes.",
+      "ai_role": "Extract statements and explain documented billing discrepancies",
+      "paypal_path": "Invoices, Orders or Subscriptions for bounded payments",
+      "main_constraint": "Domain-specific privacy, tax and insurance rules; no diagnosis, legal filing or underwriting",
+      "source_ids": [
+        "S03",
+        "S04"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I096",
+      "domain": "Tax, healthcare, education and insurance",
+      "name": "Tax evidence organizer",
+      "hypothesis": "Group transaction and fee records for accountant review without claiming tax-return correctness.",
+      "ai_role": "Extract statements and explain documented billing discrepancies",
+      "paypal_path": "Invoices, Orders or Subscriptions for bounded payments",
+      "main_constraint": "Domain-specific privacy, tax and insurance rules; no diagnosis, legal filing or underwriting",
+      "source_ids": [
+        "S03",
+        "S04"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I097",
+      "domain": "PYUSD, quantitative finance and HFT-adjacent infrastructure",
+      "name": "TreasuryLab",
+      "hypothesis": "Stress-test a synthetic merchant's fiat and PYUSD obligations under settlement delays and wallet outages.",
+      "ai_role": "Forecast bounded scenarios and explain control decisions",
+      "paypal_path": "Separate PYUSD testnet plus an actual PayPal Sandbox core flow",
+      "main_constraint": "No assumed fiat bridge, internal liquidity access, exchange matching engine or profitable trading strategy",
+      "source_ids": [
+        "S23",
+        "S29",
+        "S30"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I098",
+      "domain": "PYUSD, quantitative finance and HFT-adjacent infrastructure",
+      "name": "Quote staleness supervisor",
+      "hypothesis": "Detect stale or expired quotes and stop execution instead of predicting arbitrage profits.",
+      "ai_role": "Forecast bounded scenarios and explain control decisions",
+      "paypal_path": "Separate PYUSD testnet plus an actual PayPal Sandbox core flow",
+      "main_constraint": "No assumed fiat bridge, internal liquidity access, exchange matching engine or profitable trading strategy",
+      "source_ids": [
+        "S23",
+        "S29",
+        "S30"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I099",
+      "domain": "PYUSD, quantitative finance and HFT-adjacent infrastructure",
+      "name": "Inventory and exposure limits",
+      "hypothesis": "Borrow pre-trade limits and kill switches for simulated payment-rail inventory management.",
+      "ai_role": "Forecast bounded scenarios and explain control decisions",
+      "paypal_path": "Separate PYUSD testnet plus an actual PayPal Sandbox core flow",
+      "main_constraint": "No assumed fiat bridge, internal liquidity access, exchange matching engine or profitable trading strategy",
+      "source_ids": [
+        "S23",
+        "S29",
+        "S30"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    },
+    {
+      "id": "I100",
+      "domain": "PYUSD, quantitative finance and HFT-adjacent infrastructure",
+      "name": "Settlement netting laboratory",
+      "hypothesis": "Compare gross and net funding requirements on synthetic obligations and demonstrate a separate testnet settlement.",
+      "ai_role": "Forecast bounded scenarios and explain control decisions",
+      "paypal_path": "Separate PYUSD testnet plus an actual PayPal Sandbox core flow",
+      "main_constraint": "No assumed fiat bridge, internal liquidity access, exchange matching engine or profitable trading strategy",
+      "source_ids": [
+        "S23",
+        "S29",
+        "S30"
+      ],
+      "evidence_status": "Generated product hypothesis; not a validated unmet need"
+    }
+  ]
+}

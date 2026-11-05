@@ -1,0 +1,34 @@
+{
+  "status": "Simplified reference designs, not implemented or benchmarked",
+  "basis": "Reviewed Assembly Proof A/B specification dated November 1, 2026",
+  "diagrams": [
+    {
+      "id": "A-final-overall",
+      "title": "A | One application, one worker, one financial database",
+      "caption": "Current implementation target. Managed synchronous PostgreSQL protects the specified AZ failure model; regional recovery remains separate.",
+      "nodes": 9,
+      "edges": 10,
+      "png_pixels": [
+        1144,
+        1434
+      ]
+    },
+    {
+      "id": "B-final-overall",
+      "title": "B | The same application in regional cells",
+      "caption": "Future production evolution. Current authority and financial writes require quorum; region placement and capacity require validation.",
+      "nodes": 10,
+      "edges": 14,
+      "png_pixels": [
+        2151,
+        1243
+      ]
+    }
+  ],
+  "limits": [
+    "No zero-defect or zero-loss guarantee",
+    "No customer-fund custody",
+    "No measured billion-user capacity",
+    "Mermaid sources were not independently rendered"
+  ]
+}

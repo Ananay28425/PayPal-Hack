@@ -1,0 +1,23 @@
+flowchart TD
+    spec["Reviewed business contract<br/>independently labeled expected outcomes"]
+    proposal["Bounded scenario proposal<br/>AI or fixed templates<br/>pinned prompt / seed / budget"]
+    runner["Typed legal-scenario runner<br/>controlled local scheduler<br/>no arbitrary generated code"]
+    target["Owned vulnerable / corrected fixture<br/>Assembly + PayGuard + merchant worker"]
+    fault["Local fault hooks<br/>response drop / crash / event redelivery<br/>concurrent dispatch / stale offer"]
+    provider["Mode explicitly chosen<br/>synthetic model / recorded adapter<br/>or real PayPal Sandbox"]
+    trace["Observed event history<br/>source provenance and causal IDs"]
+    oracle["Independent oracle<br/>history properties + reference expectations<br/>pass / fail / invalid / inconclusive"]
+    reduce["Trace reducer<br/>preserve prerequisites and same failure<br/>no global-minimum claim"]
+    export["Postman + runner manifest<br/>code and contract versions<br/>fails before / passes after fix"]
+    spec --> proposal
+    proposal --> runner
+    runner --> target
+    fault --> target
+    target --> provider
+    target --> trace
+    provider -->|independent resource observations| trace
+    spec --> oracle
+    trace --> oracle
+    oracle -->|verified failure| reduce
+    reduce -.->|controlled rerun| runner
+    reduce --> export

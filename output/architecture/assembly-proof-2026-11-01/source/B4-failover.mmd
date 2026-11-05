@@ -1,0 +1,22 @@
+flowchart TD
+    fault["Region / worker / network failure"]
+    pause["Gate financial dispatch<br/>old owner loses quorum / authority<br/>keep browsing through projections"]
+    quorum{"Financial journal quorum available?"}
+    stop["No quorum: remain unavailable for money<br/>no blind promotion from stale backup"]
+    elect["Recover durable state and owner epoch<br/>new worker claims using CAS<br/>old owner rejected by current gateway"]
+    inflight["Read unresolved operation intents<br/>known provider IDs + original request keys"]
+    provider["Query authoritative PayPal resources<br/>supported exact retry within retention<br/>no fresh replacement on ambiguity"]
+    outcome{"Outcome established?"}
+    complete["Commit observed result + effect outbox<br/>deduplicate downstream commitment"]
+    review["Hold reservation / operator review<br/>retain correlation and evidence<br/>recovery duration is not guaranteed"]
+    resume["Resume bounded new traffic<br/>check retry backlog and provider quotas"]
+    fault --> pause
+    pause --> quorum
+    quorum -->|no| stop
+    quorum -->|yes| elect
+    elect --> inflight
+    inflight --> provider
+    provider --> outcome
+    outcome -->|yes| complete
+    outcome -->|no| review
+    complete --> resume

@@ -1,0 +1,40 @@
+digraph G {
+graph [rankdir=TB, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="A1 | Buildable single-region architecture"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+subgraph cluster_0 { label="Render: one region"; fontsize=14; color="#CBDCE6"; style="rounded";
+"api" [label="FastAPI modular domain service\nAssembly + PayGuard\nversioned offers and approval", shape=box, fillcolor="#E3EFF8"];
+"worker" [label="Bounded worker\npayment dispatch + reconciliation\nevidence / downstream jobs", shape=box, fillcolor="#E3EFF8"];
+"hook" [label="Webhook ingress\nraw signature verification\ntenant binding and deduplication", shape=box, fillcolor="#E3EFF8"];
+}
+subgraph cluster_1 { label="Financial durability: one region"; fontsize=14; color="#CBDCE6"; style="rounded";
+"db" [label="Managed PostgreSQL primary\nversions / consent / operation intents\ninbox / outbox / fulfillment", shape=cylinder, fillcolor="#E3EFF8"];
+"standby" [label="Synchronous standby in another AZ\nmanaged failover; write-latency cost\nnot a read-scaling replica", shape=box, fillcolor="#E3EFF8"];
+"backup" [label="Encrypted PITR / backups\nrestore drills and restricted keys\nregional disaster is a separate recovery event", shape=box, fillcolor="#E6F4EF"];
+}
+subgraph cluster_2 { label="Scoped external capabilities"; fontsize=14; color="#CBDCE6"; style="rounded";
+"ai" [label="Astropods\nread-only extraction proposals\nno payment credentials", shape=box, fillcolor="#FFF2D9"];
+"facts" [label="Channel3 + Kernel\nproduct candidates / permitted pages\nuntrusted until checked", shape=box, fillcolor="#FFF2D9"];
+"search" [label="Elastic\nrebuildable evidence index", shape=box, fillcolor="#E6F4EF"];
+"zap" [label="Zapier\napproved setup-task handoff", shape=box, fillcolor="#E6F4EF"];
+}
+"buyer" [label="Buyer / merchant\nTypeScript + React\nAG Studio + Bryntum", shape=box, fillcolor="#FFFFFF"];
+"edge" [label="CDN / WAF / rate limits\nOIDC session validation", shape=box, fillcolor="#FFFFFF"];
+"pp" [label="PayPal Sandbox\ncreate / buyer approval / capture\nresource read-back", shape=box, fillcolor="#E3EFF8"];
+"tests" [label="Isolated Counterexample\nAPIMatic development context\nPostman regressions", shape=box, fillcolor="#EEE9FA"];
+"buyer" -> "edge" [label="", style=solid];
+"edge" -> "api" [label="", style=solid];
+"api" -> "db" [label="commit", style=solid];
+"db" -> "worker" [label="outbox", style=dashed];
+"worker" -> "pp" [label="PayPal API", style=solid];
+"pp" -> "hook" [label="signed events", style=dashed];
+"hook" -> "db" [label="verified inbox", style=solid];
+"db" -> "standby" [label="synchronous replication", style=solid];
+"db" -> "backup" [label="WAL / restore points", style=dashed];
+"api" -> "ai" [label="extract", style=solid];
+"worker" -> "facts" [label="retrieve", style=solid];
+"facts" -> "db" [label="accepted facts", style=dashed];
+"db" -> "search" [label="projection", style=dashed];
+"worker" -> "zap" [label="consented task", style=dashed];
+"tests" -> "api" [label="owned test environment only", style=dashed];
+}

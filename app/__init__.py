@@ -1,0 +1,1 @@
+"""Assembly Proof application."""

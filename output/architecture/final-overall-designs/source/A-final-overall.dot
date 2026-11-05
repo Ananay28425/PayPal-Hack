@@ -1,0 +1,24 @@
+digraph G {
+graph [rankdir=TB, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="A | One application, one worker, one financial database"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+"ui" [label="Buyer / merchant UI\nReact + TypeScript\nAG Studio + Bryntum", shape=box, fillcolor="#FFFFFF"];
+"edge" [label="Managed edge + identity\nCDN / WAF / OIDC / quotas", shape=box, fillcolor="#FFFFFF"];
+"evidence" [label="Evidence and AI preparation\nChannel3 / Astropods / Kernel / Elastic\nscoped proposals; no payment authority", shape=box, fillcolor="#FFF2D9"];
+"pp" [label="PayPal\nbuyer approval / capture / verification", shape=box, fillcolor="#E3EFF8"];
+"task" [label="Approved setup task\nZapier; after verified payment", shape=box, fillcolor="#E6F4EF"];
+"qa" [label="Isolated Counterexample\nAPIMatic development context\nPostman independent regressions", shape=box, fillcolor="#EEE9FA"];
+"app" [label="One FastAPI application on Render\nAssembly checks + PayGuard authority\nversioned offers / approvals / webhook ingress", shape=box, fillcolor="#E3EFF8"];
+"sql" [label="Managed PostgreSQL\nprimary + synchronous AZ standby\npurchases / reservations / inbox / outbox", shape=cylinder, fillcolor="#E3EFF8"];
+"worker" [label="One worker service on Render\nseparate bounded job pools\npayment dispatch / reconciliation / follow-through", shape=box, fillcolor="#E3EFF8"];
+"ui" -> "edge" [label="", style=solid];
+"edge" -> "app" [label="", style=solid];
+"app" -> "sql" [label="short transactions", style=solid];
+"app" -> "evidence" [label="prepare", style=solid];
+"sql" -> "worker" [label="durable jobs", style=dashed];
+"worker" -> "pp" [label="stable operation identity", style=solid];
+"pp" -> "app" [label="signed webhook", style=dashed];
+"worker" -> "sql" [label="confirmed / unknown outcome", style=solid];
+"worker" -> "task" [label="explicit consent", style=dashed];
+"qa" -> "app" [label="owned test environment", style=dashed];
+}

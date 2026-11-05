@@ -1,0 +1,91 @@
+{
+  "as_of": "2026-10-23",
+  "method": "Five subjective ordinal ratings, 1-5, equally weighted. Sum is a planning aid, not a judge score or win probability.",
+  "sensitivity": "A one-point revision to each criterion changes a total by up to five; close concept rankings are not robust.",
+  "rows": [
+    {
+      "concept": "RecoverPlan",
+      "Implementation": 4,
+      "Design": 4,
+      "Impact": 4,
+      "Innovation": 4,
+      "Presentation": 5,
+      "total": 21,
+      "delivery_risk": "Medium",
+      "decision_condition": "Prove business-goal repair beyond existing Saga middleware.",
+      "assessment_type": "Subjective concept potential, not measured results or win probability"
+    },
+    {
+      "concept": "ReservePilot",
+      "Implementation": 4,
+      "Design": 4,
+      "Impact": 4,
+      "Innovation": 3,
+      "Presentation": 4,
+      "total": 19,
+      "delivery_risk": "Medium",
+      "decision_condition": "Prove fresh obligation accounting beyond cash caps and AP scheduling.",
+      "assessment_type": "Subjective concept potential, not measured results or win probability"
+    },
+    {
+      "concept": "ClearFX",
+      "Implementation": 3,
+      "Design": 4,
+      "Impact": 4,
+      "Innovation": 3,
+      "Presentation": 4,
+      "total": 18,
+      "delivery_risk": "Access-dependent",
+      "decision_condition": "Verify FXaaS permissions before promising live quotes or guarantees.",
+      "assessment_type": "Subjective concept potential, not measured results or win probability"
+    },
+    {
+      "concept": "ReturnRouter",
+      "Implementation": 4,
+      "Design": 4,
+      "Impact": 4,
+      "Innovation": 2,
+      "Presentation": 4,
+      "total": 18,
+      "delivery_risk": "Medium",
+      "decision_condition": "Crowded returns market; one concrete advantage needs user evidence.",
+      "assessment_type": "Subjective concept potential, not measured results or win probability"
+    },
+    {
+      "concept": "ToolMeter",
+      "Implementation": 4,
+      "Design": 4,
+      "Impact": 3,
+      "Innovation": 2,
+      "Presentation": 4,
+      "total": 17,
+      "delivery_risk": "Medium",
+      "decision_condition": "Differentiate from existing metering and machine-payment products.",
+      "assessment_type": "Subjective concept potential, not measured results or win probability"
+    },
+    {
+      "concept": "PayGuard baseline",
+      "Implementation": 4,
+      "Design": 4,
+      "Impact": 4,
+      "Innovation": 1,
+      "Presentation": 4,
+      "total": 17,
+      "delivery_risk": "Lower",
+      "decision_condition": "Direct public overlap makes the original broad concept a weak novelty bet.",
+      "assessment_type": "Subjective concept potential, not measured results or win probability"
+    },
+    {
+      "concept": "TreasuryLab",
+      "Implementation": 2,
+      "Design": 3,
+      "Impact": 4,
+      "Innovation": 4,
+      "Presentation": 3,
+      "total": 16,
+      "delivery_risk": "High",
+      "decision_condition": "Synthetic treasury data and separate testnet limit production claims.",
+      "assessment_type": "Subjective concept potential, not measured results or win probability"
+    }
+  ]
+}

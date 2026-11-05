@@ -1,0 +1,29 @@
+digraph G {
+graph [rankdir=TB, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="B | The same application in regional cells"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+"ui" [label="Buyer / merchant UI\nReact + TypeScript\nAG Studio + Bryntum", shape=box, fillcolor="#FFFFFF"];
+"edge" [label="Managed edge + identity\nCDN / WAF / OIDC / quotas", shape=box, fillcolor="#FFFFFF"];
+"evidence" [label="Evidence and AI preparation\nChannel3 / Astropods / Kernel / Elastic\nscoped proposals; no payment authority", shape=box, fillcolor="#FFF2D9"];
+"pp" [label="PayPal\nbuyer approval / capture / verification", shape=box, fillcolor="#E3EFF8"];
+"task" [label="Approved setup task\nZapier; after verified payment", shape=box, fillcolor="#E6F4EF"];
+"qa" [label="Isolated Counterexample\nAPIMatic development context\nPostman independent regressions", shape=box, fillcolor="#EEE9FA"];
+"routing" [label="Regional request routing\ncurrent owner for money; local reads\nownership metadata in financial SQL", shape=box, fillcolor="#E3EFF8"];
+"cell_a" [label="Region A: Render application cell\nsame FastAPI code + bounded workers\nper-tenant admission and recovery capacity", shape=box, fillcolor="#E3EFF8"];
+"cell_b" [label="Region B: Render application cell\nsame FastAPI code + bounded workers\nper-tenant admission and recovery capacity", shape=box, fillcolor="#E3EFF8"];
+"sql" [label="Managed distributed financial SQL\nexplicit SERIALIZABLE transactions\nregion-survival quorum: 3+ permitted DB regions\nversions / reservations / inbox / outbox", shape=cylinder, fillcolor="#E3EFF8"];
+"ui" -> "edge" [label="", style=solid];
+"edge" -> "routing" [label="authenticated application requests", style=solid];
+"routing" -> "cell_a" [label="current owner", style=solid];
+"routing" -> "cell_b" [label="current owner", style=solid];
+"cell_a" -> "evidence" [label="scoped preparation", style=solid];
+"cell_a" -> "sql" [label="authoritative state", style=solid];
+"cell_a" -> "pp" [label="quota-limited operations", style=solid];
+"cell_a" -> "task" [label="approved downstream job", style=dashed];
+"cell_b" -> "evidence" [label="scoped preparation", style=solid];
+"cell_b" -> "sql" [label="authoritative state", style=solid];
+"cell_b" -> "pp" [label="quota-limited operations", style=solid];
+"cell_b" -> "task" [label="approved downstream job", style=dashed];
+"pp" -> "routing" [label="verified ingress routing", style=dashed];
+"qa" -> "cell_a" [label="isolated release tests", style=dashed];
+}

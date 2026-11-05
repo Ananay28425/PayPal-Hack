@@ -1,0 +1,30 @@
+digraph G {
+graph [rankdir=TB, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="A4 | Authoritative data model"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+"tenant" [label="TENANT / ACTOR / POLICY\ntenant_id + actor_id + policy_version", shape=box, fillcolor="#E3EFF8"];
+"config" [label="CONFIGURATION_VERSION\nrequirements / accepted facts / rule results", shape=box, fillcolor="#E3EFF8"];
+"evidence" [label="EVIDENCE\nsource / exact variant / retrieved_at / digest", shape=box, fillcolor="#E3EFF8"];
+"offer" [label="OFFER_VERSION\ncanonical material manifest / expiry\namount_minor NUMERIC(38,0) + currency + scale", shape=box, fillcolor="#E3EFF8"];
+"approval" [label="APPROVAL\nactor / offer_version / policy_version\naccepted_at / revoked_at / expires_at", shape=box, fillcolor="#E3EFF8"];
+"purchase" [label="PURCHASE\nbusiness_intent_id UNIQUE per tenant\ncurrent operation / committed manifest", shape=box, fillcolor="#E3EFF8"];
+"budget" [label="BUDGET_RESERVATION\npolicy scope + operation identity\nno release on timeout alone", shape=box, fillcolor="#E3EFF8"];
+"inventory" [label="INVENTORY_RESERVATION\nmerchant SKU + quantity + operation\nreserve stock atomically; retain while ambiguous", shape=box, fillcolor="#E3EFF8"];
+"operation" [label="PAYMENT_OPERATION\nkind / request_key / body_hash / state\nprovider_order_id / capture_id / version", shape=box, fillcolor="#E3EFF8"];
+"inbox" [label="PROVIDER_INBOX\nmerchant_app + event_id UNIQUE\nsignature result / raw payload reference", shape=box, fillcolor="#E3EFF8"];
+"outbox" [label="OUTBOX + EFFECT_COMMITMENT\npurchase + effect_kind UNIQUE\ndelivery attempts / remote receipt ID", shape=box, fillcolor="#E3EFF8"];
+"audit" [label="AUDIT / OBSERVATIONS\nappend-only events / rule versions\nredacted payload reference + correlation IDs", shape=box, fillcolor="#E3EFF8"];
+"test" [label="TEST_RUN + SCENARIO\ncode revision / independent oracle version\nsynthetic or real-sandbox provenance", shape=box, fillcolor="#EEE9FA"];
+"tenant" -> "config" [label="1 : many", style=solid];
+"config" -> "evidence" [label="many : many via fact refs", style=solid];
+"config" -> "offer" [label="1 : many", style=solid];
+"offer" -> "approval" [label="1 : many", style=solid];
+"approval" -> "purchase" [label="accepted authority", style=solid];
+"purchase" -> "operation" [label="1 : many operation kinds", style=solid];
+"purchase" -> "budget" [label="reservations", style=solid];
+"purchase" -> "inventory" [label="stock commitments", style=solid];
+"operation" -> "inbox" [label="correlated provider evidence", style=solid];
+"operation" -> "outbox" [label="atomic result + outbox", style=solid];
+"operation" -> "audit" [label="1 : many", style=solid];
+"test" -> "audit" [label="isolated evidence IDs", style=solid];
+}

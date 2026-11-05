@@ -1,0 +1,18 @@
+flowchart TD
+    command["Authenticated financial command<br/>merchant + purchase + authority scope"]
+    owner["Resolve authority owner<br/>tenant / budget / cell / epoch"]
+    quorum{"Current owner and quorum reachable?"}
+    tx["Short SERIALIZABLE transaction<br/>check material version + live policy<br/>reserve budget + unique operation + outbox"]
+    reject["Pause financial command<br/>503 / explicit pending<br/>never authorize from stale cache"]
+    adapter["Commit first; call PayPal afterward<br/>fixed operation key and body hash<br/>retry DB-only code separately"]
+    budget["One owner for each shared budget<br/>co-locate budget and purchases<br/>no eventually consistent global spend counter"]
+    browse["Browsing / search<br/>regional cache and projections<br/>show evidence version and age"]
+    partition["Network partition<br/>majority may progress<br/>minority cannot dispatch"]
+    command --> owner
+    owner --> quorum
+    quorum -->|yes| tx
+    quorum -->|no| reject
+    budget -->|same authority scope| tx
+    tx -->|durable intent| adapter
+    partition -->|financial consistency first| quorum
+    partition -.->|available with bounded staleness| browse

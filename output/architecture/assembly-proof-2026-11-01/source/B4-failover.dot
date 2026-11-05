@@ -1,0 +1,26 @@
+digraph G {
+graph [rankdir=TB, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="B4 | Fenced failover and ambiguous payments"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+"fault" [label="Region / worker / network failure", shape=box, fillcolor="#FCE8E6"];
+"pause" [label="Gate financial dispatch\nold owner loses quorum / authority\nkeep browsing through projections", shape=box, fillcolor="#E3EFF8"];
+"quorum" [label="Financial journal quorum available?", shape=diamond, fillcolor="#E3EFF8"];
+"stop" [label="No quorum: remain unavailable for money\nno blind promotion from stale backup", shape=box, fillcolor="#FCE8E6"];
+"elect" [label="Recover durable state and owner epoch\nnew worker claims using CAS\nold owner rejected by current gateway", shape=box, fillcolor="#E3EFF8"];
+"inflight" [label="Read unresolved operation intents\nknown provider IDs + original request keys", shape=box, fillcolor="#E3EFF8"];
+"provider" [label="Query authoritative PayPal resources\nsupported exact retry within retention\nno fresh replacement on ambiguity", shape=box, fillcolor="#E3EFF8"];
+"outcome" [label="Outcome established?", shape=diamond, fillcolor="#E3EFF8"];
+"complete" [label="Commit observed result + effect outbox\ndeduplicate downstream commitment", shape=box, fillcolor="#E6F4EF"];
+"review" [label="Hold reservation / operator review\nretain correlation and evidence\nrecovery duration is not guaranteed", shape=box, fillcolor="#FCE8E6"];
+"resume" [label="Resume bounded new traffic\ncheck retry backlog and provider quotas", shape=box, fillcolor="#E6F4EF"];
+"fault" -> "pause" [label="", style=solid];
+"pause" -> "quorum" [label="", style=solid];
+"quorum" -> "stop" [label="no", style=solid];
+"quorum" -> "elect" [label="yes", style=solid];
+"elect" -> "inflight" [label="", style=solid];
+"inflight" -> "provider" [label="", style=solid];
+"provider" -> "outcome" [label="", style=solid];
+"outcome" -> "complete" [label="yes", style=solid];
+"outcome" -> "review" [label="no", style=solid];
+"complete" -> "resume" [label="", style=solid];
+}

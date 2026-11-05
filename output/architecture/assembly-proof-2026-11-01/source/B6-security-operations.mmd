@@ -1,0 +1,21 @@
+flowchart LR
+    edge["Public edge<br/>WAF / auth / abuse prevention<br/>per-tenant and per-action quotas"]
+    domain["Domain cells<br/>object and field authorization<br/>tenant-scoped commands"]
+    money["Payment egress<br/>least privilege / rotating secrets<br/>allowlisted destinations / current epoch"]
+    sql["Quorum financial SQL<br/>strict state reads / encrypted transport<br/>key and data residency policy"]
+    ai["AI / evidence workers<br/>no financial credentials<br/>output validation / SSRF defense"]
+    tests["Counterexample cells<br/>separate identities and databases<br/>production endpoints blocked"]
+    ops["Operator / release control<br/>MFA + privileged approval<br/>signed artifacts / dependency inventory"]
+    telemetry["Redacted traces and security events<br/>separate access-controlled audit sink<br/>immutable retention only where supported"]
+    backup["Encrypted backups / restore drills<br/>key access and deletion policy<br/>quorum replication does not replace backups"]
+    response["Incident response<br/>kill financial dispatch / isolate tenant<br/>rotate keys / investigate / reconcile"]
+    edge --> domain
+    domain --> money
+    domain --> sql
+    ai -->|typed proposed data| domain
+    ops -.->|reviewed release| domain
+    domain -.->|redacted events| telemetry
+    money -.->|operation evidence| telemetry
+    sql -.->|encrypted backup| backup
+    telemetry -.->|alerts| response
+    response -->|scoped stop control| money

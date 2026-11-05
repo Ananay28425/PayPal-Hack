@@ -1,0 +1,24 @@
+flowchart TD
+    traffic["Peak traffic / bot traffic / retries"]
+    edge["CDN / WAF / per-tenant quotas<br/>request coalescing and deduplication"]
+    classify{"Classify work"}
+    read["Browse / search<br/>cache / stale-while-revalidate<br/>shed costly optional views"]
+    ai["AI preparation<br/>small concurrency pool / token budget<br/>cancel outdated drafts"]
+    pay["Financial commands<br/>validate auth + unique request + current version<br/>reserve only after bounded admission"]
+    queue["Durable bounded queue / outbox<br/>per-tenant fairness + expiry<br/>202 means queued, not paid"]
+    workers["Independent payment worker pool<br/>connection caps + measured scaling<br/>revalidate authority before dispatch"]
+    pp["PayPal quota / circuit breaker<br/>Retry-After + jitter + bounded retries"]
+    reconcile["Reserved reconciliation capacity<br/>unknown outcomes cannot starve<br/>verified webhook inbox processed first"]
+    overflow["Reject excess / expire safely<br/>429 with retry guidance<br/>no unbounded in-memory backlog"]
+    optional["External tasks / analytics / evidence refresh<br/>lower priority; isolated quotas"]
+    traffic --> edge
+    edge --> classify
+    classify --> read
+    classify --> ai
+    classify --> pay
+    pay --> queue
+    queue --> workers
+    workers --> pp
+    queue -->|full or expired| overflow
+    reconcile -->|separate budget| pp
+    queue -.->|nonfinancial pool| optional

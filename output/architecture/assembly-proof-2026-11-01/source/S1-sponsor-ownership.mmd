@@ -1,0 +1,32 @@
+flowchart LR
+    product["Assembly Proof<br/>one merchant purchasing outcome"]
+    interface["Product interface"]
+    ag["AG Grid / AG Studio<br/>linked evidence and conflict workspace"]
+    bry["Bryntum<br/>readiness and setup dependencies"]
+    evidence_ai["Evidence and AI"]
+    channel["Channel3<br/>real candidate and variant discovery"]
+    astro["Astropods<br/>bounded extraction stage and traces"]
+    elastic["Elastic<br/>rebuildable evidence / incident search"]
+    kernel["Kernel<br/>permitted pages + owned browser QA"]
+    delivery["Hosting and follow-through"]
+    render["Render<br/>regional app and worker deployments"]
+    zap["Zapier<br/>approved post-payment setup task"]
+    engineering["Development and verification"]
+    apimatic["APIMatic<br/>PayPal adapter development context"]
+    postman["Postman<br/>independent API regression evidence"]
+    authority["PayGuard + SQL + PayPal adapter<br/>financial authority remains here"]
+    product -->|bounded responsibility| interface
+    interface -->|role| ag
+    interface -->|role| bry
+    product -->|bounded responsibility| evidence_ai
+    evidence_ai -->|role| channel
+    evidence_ai -->|role| astro
+    evidence_ai -.->|role| elastic
+    evidence_ai -->|role| kernel
+    product -->|bounded responsibility| delivery
+    delivery -->|role| render
+    delivery -.->|role| zap
+    product -.->|bounded responsibility| engineering
+    engineering -.->|role| apimatic
+    engineering -.->|role| postman
+    product -->|no sponsor may bypass this boundary| authority

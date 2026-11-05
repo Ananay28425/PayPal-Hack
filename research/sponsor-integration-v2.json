@@ -1,0 +1,186 @@
+{
+  "sponsors": [
+    {
+      "name": "AG Grid",
+      "slug": "aggrid",
+      "capability": "AG Studio supports embedded grids, charts, custom widgets and an agent framework.",
+      "role": "Configuration comparisons and source-linked conflict widgets.",
+      "boundary": "The UI must display backend-checked results, not create payment authority.",
+      "access": "45-day trial advertised.",
+      "url": "https://paypalaihackathon.devpost.com/details/aggrid",
+      "status": "Documented capability; proposed integration, not executed"
+    },
+    {
+      "name": "APIMatic",
+      "slug": "apimatic",
+      "capability": "The PayPal Context Plugin supplies API/SDK context to coding tools.",
+      "role": "Build the PayPal adapter and record a concrete context-assisted integration example.",
+      "boundary": "Development assistance; not a runtime payment validator.",
+      "access": "PayPal plugin needs no separate APIMatic credentials; subscription offers have conditions.",
+      "url": "https://paypalaihackathon.devpost.com/details/apimatic",
+      "status": "Documented capability; proposed integration, not executed"
+    },
+    {
+      "name": "Astropods",
+      "slug": "astropods",
+      "capability": "Deployable agent blueprints, tool integrations and observability; container HTTP/FastAPI is documented.",
+      "role": "Host the requirement/specification compiler with traces.",
+      "boundary": "Authenticated invocation and account resource/model limits need a live spike.",
+      "access": "Free account advertised; operational limits unverified.",
+      "url": "https://paypalaihackathon.devpost.com/details/astropods",
+      "status": "Documented capability; proposed integration, not executed"
+    },
+    {
+      "name": "Bryntum",
+      "slug": "bryntum",
+      "capability": "Gantt dependencies and resource Scheduler/Calendar components.",
+      "role": "Editable delivery, assembly and setup dependencies.",
+      "boundary": "Backend domain logic remains authoritative for feasibility.",
+      "access": "45-day trial advertised.",
+      "url": "https://paypalaihackathon.devpost.com/details/bryntum",
+      "status": "Documented capability; proposed integration, not executed"
+    },
+    {
+      "name": "Channel3",
+      "slug": "channel3",
+      "capability": "Product discovery and enrichment with prices, offers, variants and retailer links.",
+      "role": "Find candidates and connect evidence to exact variants.",
+      "boundary": "No implied retailer payment authority; missing technical specifications stay unknown.",
+      "access": "20,000 hackathon API credits advertised.",
+      "url": "https://paypalaihackathon.devpost.com/details/channel3",
+      "status": "Documented capability; proposed integration, not executed"
+    },
+    {
+      "name": "Elastic",
+      "slug": "elastic",
+      "capability": "Structured, text and vector search, including hybrid retrieval.",
+      "role": "Retrieve normalized specifications and original evidence passages.",
+      "boundary": "Search projections do not replace durable order state.",
+      "access": "14-day cloud trial, further 30-day extension path; local option documented.",
+      "url": "https://paypalaihackathon.devpost.com/details/elastic",
+      "status": "Documented capability; proposed integration, not executed"
+    },
+    {
+      "name": "Kernel",
+      "slug": "kernel",
+      "capability": "Cloud browser sessions with live views and video recordings.",
+      "role": "Inspect permitted specification pages and retain evidence.",
+      "boundary": "Recorded video is not deterministic transaction replay or proof that a claim is true.",
+      "access": "$50 hackathon credits advertised.",
+      "url": "https://paypalaihackathon.devpost.com/details/kernel",
+      "status": "Documented capability; proposed integration, not executed"
+    },
+    {
+      "name": "Postman",
+      "slug": "postman",
+      "capability": "API design, testing, documentation and monitoring; PayPal collections are available.",
+      "role": "Export a configuration-linked payment lifecycle/regression collection.",
+      "boundary": "Use independent assertions; redact tokens and private data.",
+      "access": "Free starting plan; selected feature limits need checking.",
+      "url": "https://paypalaihackathon.devpost.com/details/postman",
+      "status": "Documented capability; proposed integration, not executed"
+    },
+    {
+      "name": "Render",
+      "slug": "render",
+      "capability": "Web services, databases, workers and Python/TypeScript workflow tasks.",
+      "role": "Run domain/payment API, PostgreSQL and verification jobs.",
+      "boundary": "Automatic retries still require durable operation IDs and application idempotency.",
+      "access": "$50 hackathon credits advertised.",
+      "url": "https://paypalaihackathon.devpost.com/details/render",
+      "status": "Documented capability; proposed integration, not executed"
+    },
+    {
+      "name": "Zapier",
+      "slug": "zapier",
+      "capability": "MCP actions across connected applications with managed connections.",
+      "role": "Create an approved setup task after verified capture.",
+      "boundary": "Scope credentials and handle ambiguous action outcomes; do not grant arbitrary AI writes.",
+      "access": "14-day Professional trial then Free; required action availability needs checking.",
+      "url": "https://paypalaihackathon.devpost.com/details/zapier",
+      "status": "Documented capability; proposed integration, not executed"
+    }
+  ],
+  "references": [
+    [
+      "Hackathon rules",
+      "https://paypalaihackathon.devpost.com/rules",
+      "Deadline, judging dates, criteria, functional demo, open-source repository and third-party license requirements."
+    ],
+    [
+      "Hackathon resources",
+      "https://paypalaihackathon.devpost.com/resources",
+      "Official links to all ten sponsors and PayPal developer resources."
+    ],
+    [
+      "Channel3 response schema",
+      "https://docs.trychannel3.com/guides/response-overview",
+      "Discovery fields and the possibility of absent descriptions, dimensions or variants; product metadata is not a compatibility guarantee."
+    ],
+    [
+      "Channel3 product details",
+      "https://docs.trychannel3.com/api-reference/v1/product-detail",
+      "Variant/offer structure and country/currency options; access and actual category coverage were not exercised."
+    ],
+    [
+      "APIMatic PayPal plugin",
+      "https://context.apimatic.io/plugins/paypal.md",
+      "PayPal development context, supported assistants including Codex, and setup instructions."
+    ],
+    [
+      "Astropods custom HTTP/FastAPI",
+      "https://docs.astropods.com/frontend-agents.md",
+      "Container HTTP deployment and OIDC protection; no anonymous service-to-service access is assumed."
+    ],
+    [
+      "AG Studio custom widgets",
+      "https://www.ag-grid.com/studio/react/custom-widgets/",
+      "Application-defined widgets can be integrated into AG Studio."
+    ],
+    [
+      "Render Workflows",
+      "https://render.com/docs/workflows",
+      "Python/TypeScript tasks, managed execution and retries; these do not provide business-level exactly-once payments."
+    ],
+    [
+      "Kernel browser observation",
+      "https://github.com/kernel/docs/blob/main/introduction/observe.mdx",
+      "Live view and MP4 recordings; deterministic application replay must be implemented separately."
+    ],
+    [
+      "PayPal idempotency",
+      "https://developer.paypal.com/reference/guidelines/idempotency/",
+      "Request IDs are endpoint-dependent and retained for a bounded time; ambiguous calls require careful reconciliation."
+    ],
+    [
+      "PayPal webhooks",
+      "https://developer.paypal.com/api/rest/webhooks/rest/",
+      "Retry behavior, verification requirements and simulator limitations."
+    ],
+    [
+      "PayPal Orders authorization",
+      "https://developer.paypal.com/api/orders/v2/orders-authorize",
+      "Authorize an order following buyer approval; separate authorization from capture."
+    ],
+    [
+      "PayPal partner authorization guide",
+      "https://developer.paypal.com/platforms/checkout/standard/customize/auth-capture",
+      "Search excerpt includes partner prerequisites and time-limited authorization; not interchangeable with ordinary single-merchant onboarding."
+    ],
+    [
+      "Neuro-symbolic AI for Industrial Configuration",
+      "https://arxiv.org/abs/2609.29947",
+      "Undermind metadata/abstract reviewed; not full-text validated or reproduced."
+    ],
+    [
+      "Ontology-Mediated Neurosymbolic Constraint Acquisition from Multiple Stakeholders",
+      "https://arxiv.org/abs/2609.29876",
+      "Undermind metadata/abstract reviewed; not full-text validated or reproduced."
+    ],
+    [
+      "Automating End-to-End Test Suite Design for Microservices with Large Language Models",
+      "https://doi.org/10.1109/COMPSAC69091.2026.00248",
+      "Undermind metadata/abstract reviewed; not full-text validated or reproduced."
+    ]
+  ]
+}

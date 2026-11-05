@@ -1,0 +1,22 @@
+digraph G {
+graph [rankdir=TB, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="S2 | Business value and loss guardrails"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+"goal" [label="Increase verified useful purchases\nsubject to financial safety and operating cost", shape=box, fillcolor="#E3EFF8"];
+"quality" [label="Assembly\nconfiguration task completion\nfalse-feasible and unknown rates", shape=box, fillcolor="#FFF2D9"];
+"authority" [label="PayGuard\nunauthorized effects observed\nlegitimate actions incorrectly blocked", shape=box, fillcolor="#E3EFF8"];
+"reliability" [label="Counterexample\nverified defects + reproducibility\ntime to useful regression", shape=box, fillcolor="#EEE9FA"];
+"outcomes" [label="Merchant outcomes\npaid purchase completion / returns\nsupport effort / repeat usage", shape=box, fillcolor="#E6F4EF"];
+"cost" [label="Operating guardrails\nmodel and browser usage\nprovider calls / infrastructure / support", shape=box, fillcolor="#FFFFFF"];
+"net" [label="Merchant contribution measurement\nrevenue less relevant costs, fees and realized losses\nrequires actual cost and cohort data", shape=box, fillcolor="#E3EFF8"];
+"pilot" [label="Controlled pilot / comparable cohorts\ndefine denominators and observation windows\nmeasure false blocks as well as failures", shape=box, fillcolor="#FFFFFF"];
+"goal" -> "quality" [label="", style=solid];
+"goal" -> "authority" [label="", style=solid];
+"goal" -> "reliability" [label="", style=solid];
+"quality" -> "outcomes" [label="hypothesized mechanism", style=solid];
+"authority" -> "outcomes" [label="hypothesized mechanism", style=solid];
+"reliability" -> "outcomes" [label="hypothesized mechanism", style=solid];
+"outcomes" -> "net" [label="", style=solid];
+"cost" -> "net" [label="", style=solid];
+"pilot" -> "net" [label="actual evidence required", style=solid];
+}

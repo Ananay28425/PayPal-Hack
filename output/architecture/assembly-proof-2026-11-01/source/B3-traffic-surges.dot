@@ -1,0 +1,28 @@
+digraph G {
+graph [rankdir=TB, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="B3 | Traffic admission and backpressure"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+"traffic" [label="Peak traffic / bot traffic / retries", shape=box, fillcolor="#FFFFFF"];
+"edge" [label="CDN / WAF / per-tenant quotas\nrequest coalescing and deduplication", shape=box, fillcolor="#FFFFFF"];
+"classify" [label="Classify work", shape=diamond, fillcolor="#E3EFF8"];
+"read" [label="Browse / search\ncache / stale-while-revalidate\nshed costly optional views", shape=box, fillcolor="#E6F4EF"];
+"ai" [label="AI preparation\nsmall concurrency pool / token budget\ncancel outdated drafts", shape=box, fillcolor="#FFF2D9"];
+"pay" [label="Financial commands\nvalidate auth + unique request + current version\nreserve only after bounded admission", shape=box, fillcolor="#E3EFF8"];
+"queue" [label="Durable bounded queue / outbox\nper-tenant fairness + expiry\n202 means queued, not paid", shape=box, fillcolor="#E3EFF8"];
+"workers" [label="Independent payment worker pool\nconnection caps + measured scaling\nrevalidate authority before dispatch", shape=box, fillcolor="#E3EFF8"];
+"pp" [label="PayPal quota / circuit breaker\nRetry-After + jitter + bounded retries", shape=box, fillcolor="#E3EFF8"];
+"reconcile" [label="Reserved reconciliation capacity\nunknown outcomes cannot starve\nverified webhook inbox processed first", shape=box, fillcolor="#E3EFF8"];
+"overflow" [label="Reject excess / expire safely\n429 with retry guidance\nno unbounded in-memory backlog", shape=box, fillcolor="#FCE8E6"];
+"optional" [label="External tasks / analytics / evidence refresh\nlower priority; isolated quotas", shape=box, fillcolor="#E6F4EF"];
+"traffic" -> "edge" [label="", style=solid];
+"edge" -> "classify" [label="", style=solid];
+"classify" -> "read" [label="", style=solid];
+"classify" -> "ai" [label="", style=solid];
+"classify" -> "pay" [label="", style=solid];
+"pay" -> "queue" [label="", style=solid];
+"queue" -> "workers" [label="", style=solid];
+"workers" -> "pp" [label="", style=solid];
+"queue" -> "overflow" [label="full or expired", style=solid];
+"reconcile" -> "pp" [label="separate budget", style=solid];
+"queue" -> "optional" [label="nonfinancial pool", style=dashed];
+}

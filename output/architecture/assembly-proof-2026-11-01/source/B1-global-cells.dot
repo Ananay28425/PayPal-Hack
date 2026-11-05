@@ -1,0 +1,33 @@
+digraph G {
+graph [rankdir=TB, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="B1 | Regional cells and separate financial durability"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+subgraph cluster_0 { label="Regional compute cells"; fontsize=14; color="#CBDCE6"; style="rounded";
+"c1" [label="Region A: Render services\nstateless domain API + worker pools\nlocal queues, quotas and circuit breakers", shape=box, fillcolor="#E3EFF8"];
+"c2" [label="Region B: Render services\nstateless domain API + worker pools\nlocal queues, quotas and circuit breakers", shape=box, fillcolor="#E3EFF8"];
+"c3" [label="Region C: Render services\nstateless domain API + worker pools\nlocal queues, quotas and circuit breakers", shape=box, fillcolor="#E3EFF8"];
+}
+"users" [label="Global buyers / merchants\nCDN content + localized UI", shape=box, fillcolor="#FFFFFF"];
+"edge" [label="Edge WAF / bot controls / admission\nread routing differs from financial routing", shape=box, fillcolor="#FFFFFF"];
+"routing" [label="Strong ownership directory\ncell_id + epoch + tenant scope\nversioned routing; stale writers rejected", shape=box, fillcolor="#E3EFF8"];
+"financial" [label="Per-cell financial SQL cluster\nCockroachDB reference profile\nSERIALIZABLE; region-survival topology", shape=cylinder, fillcolor="#E3EFF8"];
+"replica" [label="Synchronous quorum across 3 permitted regions\nregion-survival replica placement\nadditional write RTT is accepted", shape=box, fillcolor="#E3EFF8"];
+"reads" [label="Regional catalogue / Elastic projections\nCDN + disposable caches\nversioned bounded-stale reads", shape=box, fillcolor="#E6F4EF"];
+"provider" [label="PayPal\nquota-aware regional egress\noriginal business operation identity", shape=box, fillcolor="#E3EFF8"];
+"control" [label="Release / identity / secrets / telemetry\nAPIMatic + Postman + Counterexample\ncontrol-plane outage does not rewrite payments", shape=box, fillcolor="#EEE9FA"];
+"users" -> "edge" [label="", style=solid];
+"edge" -> "routing" [label="financial commands", style=solid];
+"routing" -> "c1" [label="current owner", style=solid];
+"c1" -> "financial" [label="strong SQL", style=solid];
+"routing" -> "c2" [label="current owner", style=solid];
+"c2" -> "financial" [label="strong SQL", style=solid];
+"routing" -> "c3" [label="current owner", style=solid];
+"c3" -> "financial" [label="strong SQL", style=solid];
+"financial" -> "replica" [label="quorum commit", style=solid];
+"edge" -> "reads" [label="browse / compare", style=solid];
+"financial" -> "reads" [label="redacted projection", style=dashed];
+"c1" -> "provider" [label="API quota", style=solid];
+"c2" -> "provider" [label="API quota", style=solid];
+"c3" -> "provider" [label="API quota", style=solid];
+"control" -> "routing" [label="reviewed config", style=dashed];
+}

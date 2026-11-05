@@ -1,0 +1,22 @@
+flowchart TD
+    payer["Buyer / payment method"]
+    payee["Participating merchant"]
+    pp["PayPal payment / settlement systems<br/>actual money movement and provider ledger"]
+    app["Assembly Proof<br/>noncustodial purchase authority<br/>amount + currency + provider IDs"]
+    capture["Capture observations<br/>completed / pending / refused / unknown"]
+    refund["Separate refund operations<br/>source capture + operation ID<br/>partial and pending amounts tracked"]
+    recon["Reconciliation worker<br/>provider facts vs application records<br/>exceptions retained and assigned"]
+    projection["Merchant financial projection<br/>confirmed captured / refunded amounts<br/>not a spendable wallet balance"]
+    currency["Money representation<br/>integer minor units + ISO currency + scale<br/>checked bounds; no float; no implicit FX"]
+    custody["If customer-fund custody is required<br/>separate regulated product, ledger, treasury<br/>and safeguarding architecture required"]
+    payer -->|payment rail| pp
+    pp -->|settlement per provider terms| payee
+    app -->|approved operations| pp
+    pp -.->|resource evidence| capture
+    app -->|explicit approved refund| refund
+    refund --> pp
+    capture --> recon
+    refund --> recon
+    recon --> projection
+    currency -->|validated amount model| app
+    custody -.->|outside current scope| app

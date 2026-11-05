@@ -1,0 +1,27 @@
+flowchart TD
+    human["Buyer / merchant / operator<br/>OIDC session; step-up for sensitive roles"]
+    web["Public edge<br/>WAF / request limits / CSRF / CSP"]
+    auth["Domain authorization<br/>object + property + function checks<br/>tenant-scoped queries and RLS defense"]
+    policy["PayGuard<br/>version-bound approval<br/>budget / expiry / material-term checks"]
+    egress["Payment adapter / secrets<br/>fixed PayPal hosts and scoped credentials<br/>no model or test-runtime access"]
+    vault["Secrets manager / KMS<br/>rotation / access audit"]
+    db["Authoritative SQL<br/>least-privilege roles / encryption<br/>backup and restore checks"]
+    untrusted["Product pages / API output / uploads<br/>allowlisted acquisition + size limits<br/>SSRF defenses and malware checks"]
+    model["Astropods model stage<br/>structured proposals only<br/>no credentials or arbitrary execution"]
+    validator["Fact and constraint validation<br/>critical unknowns stay unresolved<br/>accepted evidence retains provenance"]
+    pp["PayPal<br/>provider authentication + payment"]
+    hook["Webhook verifier<br/>raw bytes / app binding / inbox dedupe"]
+    test["Counterexample environment<br/>separate secrets / DB / namespace<br/>sandbox-only endpoint policy"]
+    human --> web
+    web --> auth
+    auth --> policy
+    policy --> db
+    policy -->|approved durable operation| egress
+    vault -->|scoped secret| egress
+    egress --> pp
+    untrusted -->|data only| model
+    model --> validator
+    validator -->|proposed facts, never permission| auth
+    pp -.->|signed event| hook
+    hook -->|verified durable inbox| db
+    test -.->|owned test target only| web

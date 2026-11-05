@@ -1,0 +1,38 @@
+# Deployment blueprint for a controlled PayPal Sandbox demonstration.
+# Requires an external managed PostgreSQL database. No database is created here.
+services:
+  - type: web
+    name: assembly-proof-web
+    runtime: docker
+    healthCheckPath: /api/health
+    envVars:
+      - key: ASSEMBLY_PAYMENT_MODE
+        value: sandbox
+      - key: ASSEMBLY_DEMO_TOKEN
+        generateValue: true
+      - key: ASSEMBLY_DATABASE_URL
+        sync: false
+      - key: ASSEMBLY_PUBLIC_URL
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ASSEMBLY_AI_MODEL
+        value: gpt-4.1-mini
+
+  - type: worker
+    name: assembly-proof-reconciliation
+    runtime: docker
+    dockerCommand: python -m app.worker
+    envVars:
+      - key: ASSEMBLY_PAYMENT_MODE
+        value: sandbox
+      - key: ASSEMBLY_DATABASE_URL
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false

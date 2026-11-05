@@ -1,0 +1,25 @@
+digraph G {
+graph [rankdir=TB, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="A3 | Capture-operation state machine"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+"prepared" [label="PREPARED\nbuyer-approved provider order + manifest", shape=box, fillcolor="#E3EFF8"];
+"invalid" [label="INVALIDATED / EXPIRED\npre-dispatch cancellation or terms changed", shape=box, fillcolor="#FCE8E6"];
+"dispatch" [label="DISPATCHING\nintent and reservation durable before call", shape=box, fillcolor="#E3EFF8"];
+"complete" [label="COMPLETED\nverified provider evidence", shape=box, fillcolor="#E6F4EF"];
+"failed" [label="TERMINAL_NO_EFFECT\nprovider contract establishes no capture", shape=box, fillcolor="#FFFFFF"];
+"unknown" [label="UNKNOWN\noutcome unresolved; reserve remains", shape=box, fillcolor="#FCE8E6"];
+"reconcile" [label="RECONCILING\nread authoritative resource / supported exact retry", shape=box, fillcolor="#E3EFF8"];
+"review" [label="REVIEW_REQUIRED\nretention expired or result cannot be established", shape=box, fillcolor="#FCE8E6"];
+"fulfill" [label="Fulfillment outbox / status projection\nindependent idempotent effect boundary", shape=box, fillcolor="#E6F4EF"];
+"prepared" -> "dispatch" [label="atomic final checks / reserve", style=solid];
+"prepared" -> "invalid" [label="revoked, expired or changed", style=solid];
+"dispatch" -> "complete" [label="verified success", style=solid];
+"dispatch" -> "failed" [label="conclusive refusal", style=solid];
+"dispatch" -> "unknown" [label="timeout / crash / response loss", style=solid];
+"unknown" -> "reconcile" [label="", style=solid];
+"reconcile" -> "complete" [label="capture confirmed", style=solid];
+"reconcile" -> "failed" [label="terminal no-effect evidence", style=solid];
+"reconcile" -> "unknown" [label="still ambiguous", style=solid];
+"reconcile" -> "review" [label="cannot safely determine outcome", style=solid];
+"complete" -> "fulfill" [label="commit with result", style=dashed];
+}

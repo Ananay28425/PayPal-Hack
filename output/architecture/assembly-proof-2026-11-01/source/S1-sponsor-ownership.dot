@@ -1,0 +1,44 @@
+digraph G {
+graph [rankdir=LR, bgcolor="#F8FBFD", pad="0.32", nodesep="0.35", ranksep="0.62", splines=polyline, fontname="Segoe UI", fontsize=21, labelloc=t, label="S1 | All ten sponsors with bounded responsibilities"];
+node [shape=box, style="rounded,filled", fillcolor="white", color="#ADC4D2", penwidth=1.0, fontname="Segoe UI", fontsize=12, fontcolor="#132E44", margin="0.16,0.12"];
+edge [color="#54778D", penwidth=1.15, arrowsize=0.7, fontname="Segoe UI", fontsize=10, fontcolor="#355B70"];
+subgraph cluster_0 { label="Product interface"; fontsize=14; color="#CBDCE6"; style="rounded";
+"ag" [label="AG Grid / AG Studio\nlinked evidence and conflict workspace", shape=box, fillcolor="#FFFFFF"];
+"bry" [label="Bryntum\nreadiness and setup dependencies", shape=box, fillcolor="#FFFFFF"];
+}
+subgraph cluster_1 { label="Evidence and AI"; fontsize=14; color="#CBDCE6"; style="rounded";
+"channel" [label="Channel3\nreal candidate and variant discovery", shape=box, fillcolor="#FFF2D9"];
+"astro" [label="Astropods\nbounded extraction stage and traces", shape=box, fillcolor="#FFF2D9"];
+"elastic" [label="Elastic\nrebuildable evidence / incident search", shape=box, fillcolor="#E6F4EF"];
+"kernel" [label="Kernel\npermitted pages + owned browser QA", shape=box, fillcolor="#FFF2D9"];
+}
+subgraph cluster_2 { label="Hosting and follow-through"; fontsize=14; color="#CBDCE6"; style="rounded";
+"render" [label="Render\nregional app and worker deployments", shape=box, fillcolor="#E3EFF8"];
+"zap" [label="Zapier\napproved post-payment setup task", shape=box, fillcolor="#E6F4EF"];
+}
+subgraph cluster_3 { label="Development and verification"; fontsize=14; color="#CBDCE6"; style="rounded";
+"apimatic" [label="APIMatic\nPayPal adapter development context", shape=box, fillcolor="#EEE9FA"];
+"postman" [label="Postman\nindependent API regression evidence", shape=box, fillcolor="#EEE9FA"];
+}
+"product" [label="Assembly Proof\none merchant purchasing outcome", shape=box, fillcolor="#E3EFF8"];
+"interface" [label="Product interface", shape=box, fillcolor="#FFFFFF"];
+"evidence_ai" [label="Evidence and AI", shape=box, fillcolor="#FFFFFF"];
+"delivery" [label="Hosting and follow-through", shape=box, fillcolor="#FFFFFF"];
+"engineering" [label="Development and verification", shape=box, fillcolor="#EEE9FA"];
+"authority" [label="PayGuard + SQL + PayPal adapter\nfinancial authority remains here", shape=box, fillcolor="#E3EFF8"];
+"product" -> "interface" [label="bounded responsibility", style=solid];
+"interface" -> "ag" [label="role", style=solid];
+"interface" -> "bry" [label="role", style=solid];
+"product" -> "evidence_ai" [label="bounded responsibility", style=solid];
+"evidence_ai" -> "channel" [label="role", style=solid];
+"evidence_ai" -> "astro" [label="role", style=solid];
+"evidence_ai" -> "elastic" [label="role", style=dashed];
+"evidence_ai" -> "kernel" [label="role", style=solid];
+"product" -> "delivery" [label="bounded responsibility", style=solid];
+"delivery" -> "render" [label="role", style=solid];
+"delivery" -> "zap" [label="role", style=dashed];
+"product" -> "engineering" [label="bounded responsibility", style=dashed];
+"engineering" -> "apimatic" [label="role", style=dashed];
+"engineering" -> "postman" [label="role", style=dashed];
+"product" -> "authority" [label="no sponsor may bypass this boundary", style=solid];
+}

@@ -1,0 +1,27 @@
+flowchart TD
+    users["Global buyers / merchants<br/>CDN content + localized UI"]
+    edge["Edge WAF / bot controls / admission<br/>read routing differs from financial routing"]
+    routing["Strong ownership directory<br/>cell_id + epoch + tenant scope<br/>versioned routing; stale writers rejected"]
+    c1["Region A: Render services<br/>stateless domain API + worker pools<br/>local queues, quotas and circuit breakers"]
+    c2["Region B: Render services<br/>stateless domain API + worker pools<br/>local queues, quotas and circuit breakers"]
+    c3["Region C: Render services<br/>stateless domain API + worker pools<br/>local queues, quotas and circuit breakers"]
+    financial["Per-cell financial SQL cluster<br/>CockroachDB reference profile<br/>SERIALIZABLE; region-survival topology"]
+    replica["Synchronous quorum across 3 permitted regions<br/>region-survival replica placement<br/>additional write RTT is accepted"]
+    reads["Regional catalogue / Elastic projections<br/>CDN + disposable caches<br/>versioned bounded-stale reads"]
+    provider["PayPal<br/>quota-aware regional egress<br/>original business operation identity"]
+    control["Release / identity / secrets / telemetry<br/>APIMatic + Postman + Counterexample<br/>control-plane outage does not rewrite payments"]
+    users --> edge
+    edge -->|financial commands| routing
+    routing -->|current owner| c1
+    c1 -->|strong SQL| financial
+    routing -->|current owner| c2
+    c2 -->|strong SQL| financial
+    routing -->|current owner| c3
+    c3 -->|strong SQL| financial
+    financial -->|quorum commit| replica
+    edge -->|browse / compare| reads
+    financial -.->|redacted projection| reads
+    c1 -->|API quota| provider
+    c2 -->|API quota| provider
+    c3 -->|API quota| provider
+    control -.->|reviewed config| routing

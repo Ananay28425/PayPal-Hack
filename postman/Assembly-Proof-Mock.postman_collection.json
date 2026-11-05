@@ -1,0 +1,101 @@
+{
+  "info": {
+    "name": "Assembly Proof - mock purchase regression",
+    "description": "Runs against local ASSEMBLY_PAYMENT_MODE=mock only. No real PayPal call. Set demoToken collection variable to ASSEMBLY_DEMO_TOKEN.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://127.0.0.1:8000"},
+    {"key": "demoToken", "value": ""},
+    {"key": "intentKey", "value": ""},
+    {"key": "purchaseId", "value": ""},
+    {"key": "digest", "value": ""},
+    {"key": "captureId", "value": ""}
+  ],
+  "auth": {"type": "noauth"},
+  "event": [{"listen": "prerequest", "script": {"type": "text/javascript", "exec": [
+    "if (pm.info.requestName === 'Health and mock mode') pm.collectionVariables.set('intentKey', 'postman-' + pm.variables.replaceIn('{{$guid}}'));"
+  ]}}],
+  "item": [
+    {
+      "name": "Health and mock mode",
+      "request": {"method": "GET", "url": "{{baseUrl}}/api/health"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('mock mode explicitly selected', () => pm.expect(pm.response.json().payment_mode).to.eql('mock'));"
+      ]}}]
+    },
+    {
+      "name": "Broken kit is rejected",
+      "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"requirements\":{\"people\":4,\"budget_cents\":100000,\"currency\":\"USD\"},\"selections\":[{\"product_id\":\"mic-xlr\",\"quantity\":4},{\"product_id\":\"interface-2\",\"quantity\":1},{\"product_id\":\"headphones\",\"quantity\":4}]}"},
+        "url": "{{baseUrl}}/api/check"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('capacity failure detected', () => { const v = pm.response.json(); pm.expect(v.ready).to.eql(false); pm.expect(v.checks.some(x => x.code === 'input_capacity' && x.status === 'fail')).to.eql(true); });"
+      ]}}]
+    },
+    {
+      "name": "Repaired kit is ready",
+      "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{\"requirements\":{\"people\":4,\"budget_cents\":100000,\"currency\":\"USD\"},\"selections\":[{\"product_id\":\"mic-xlr\",\"quantity\":4},{\"product_id\":\"interface-8\",\"quantity\":1},{\"product_id\":\"headphones\",\"quantity\":4},{\"product_id\":\"amp-4\",\"quantity\":1}]}"},
+        "url": "{{baseUrl}}/api/check"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('ready and exact demo total', () => { const v = pm.response.json(); pm.expect(v.ready).to.eql(true); pm.expect(v.total_cents).to.eql(81000); pm.collectionVariables.set('digest', v.digest); });"
+      ]}}]
+    },
+    {
+      "name": "Prepare frozen purchase",
+      "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-Demo-Token", "value": "{{demoToken}}"}],
+        "body": {"mode": "raw", "raw": "{\"intent_key\":\"{{intentKey}}\",\"configuration\":{\"requirements\":{\"people\":4,\"budget_cents\":100000,\"currency\":\"USD\"},\"selections\":[{\"product_id\":\"mic-xlr\",\"quantity\":4},{\"product_id\":\"interface-8\",\"quantity\":1},{\"product_id\":\"headphones\",\"quantity\":4},{\"product_id\":\"amp-4\",\"quantity\":1}]}}"},
+        "url": "{{baseUrl}}/api/purchases"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('purchase binds checked digest', () => { const v = pm.response.json(); pm.expect(v.status).to.eql('DRAFT'); pm.expect(v.digest).to.eql(pm.collectionVariables.get('digest')); pm.collectionVariables.set('purchaseId', v.id); });"
+      ]}}]
+    },
+    {
+      "name": "Reject changed approval",
+      "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-Demo-Token", "value": "{{demoToken}}"}],
+        "body": {"mode": "raw", "raw": "{\"digest\":\"0000000000000000000000000000000000000000000000000000000000000000\"}"},
+        "url": "{{baseUrl}}/api/purchases/{{purchaseId}}/approve"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('changed terms blocked', () => pm.response.to.have.status(409));"
+      ]}}]
+    },
+    {
+      "name": "Approve exact terms",
+      "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-Demo-Token", "value": "{{demoToken}}"}],
+        "body": {"mode": "raw", "raw": "{\"digest\":\"{{digest}}\"}"},
+        "url": "{{baseUrl}}/api/purchases/{{purchaseId}}/approve"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('provider order created', () => pm.expect(pm.response.json().status).to.eql('AWAITING_BUYER'));"
+      ]}}]
+    },
+    {
+      "name": "Capture before buyer approval blocked",
+      "request": {"method": "POST", "header": [{"key": "X-Demo-Token", "value": "{{demoToken}}"}], "url": "{{baseUrl}}/api/purchases/{{purchaseId}}/capture"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('buyer approval required', () => pm.response.to.have.status(409));"
+      ]}}]
+    },
+    {
+      "name": "Mock buyer approval",
+      "request": {"method": "POST", "header": [{"key": "X-Demo-Token", "value": "{{demoToken}}"}], "url": "{{baseUrl}}/api/purchases/{{purchaseId}}/mock-buyer-approve"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('mock buyer approved', () => pm.expect(pm.response.json().status).to.eql('AWAITING_BUYER'));"
+      ]}}]
+    },
+    {
+      "name": "Capture and verify",
+      "request": {"method": "POST", "header": [{"key": "X-Demo-Token", "value": "{{demoToken}}"}], "url": "{{baseUrl}}/api/purchases/{{purchaseId}}/capture"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('one verified capture', () => { const v = pm.response.json(); pm.expect(v.status).to.eql('CAPTURED'); pm.expect(v.provider_capture_id).to.be.a('string'); pm.collectionVariables.set('captureId', v.provider_capture_id); });"
+      ]}}]
+    },
+    {
+      "name": "Duplicate capture returns original",
+      "request": {"method": "POST", "header": [{"key": "X-Demo-Token", "value": "{{demoToken}}"}], "url": "{{baseUrl}}/api/purchases/{{purchaseId}}/capture"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('same capture identity', () => pm.expect(pm.response.json().provider_capture_id).to.eql(pm.collectionVariables.get('captureId')));"
+      ]}}]
+    }
+  ]
+}

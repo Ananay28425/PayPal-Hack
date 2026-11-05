@@ -1,0 +1,30 @@
+flowchart TD
+    buyer["Buyer / merchant<br/>TypeScript + React<br/>AG Studio + Bryntum"]
+    edge["CDN / WAF / rate limits<br/>OIDC session validation"]
+    api["FastAPI modular domain service<br/>Assembly + PayGuard<br/>versioned offers and approval"]
+    db["Managed PostgreSQL primary<br/>versions / consent / operation intents<br/>inbox / outbox / fulfillment"]
+    worker["Bounded worker<br/>payment dispatch + reconciliation<br/>evidence / downstream jobs"]
+    hook["Webhook ingress<br/>raw signature verification<br/>tenant binding and deduplication"]
+    standby["Synchronous standby in another AZ<br/>managed failover; write-latency cost<br/>not a read-scaling replica"]
+    backup["Encrypted PITR / backups<br/>restore drills and restricted keys<br/>regional disaster is a separate recovery event"]
+    ai["Astropods<br/>read-only extraction proposals<br/>no payment credentials"]
+    facts["Channel3 + Kernel<br/>product candidates / permitted pages<br/>untrusted until checked"]
+    search["Elastic<br/>rebuildable evidence index"]
+    zap["Zapier<br/>approved setup-task handoff"]
+    pp["PayPal Sandbox<br/>create / buyer approval / capture<br/>resource read-back"]
+    tests["Isolated Counterexample<br/>APIMatic development context<br/>Postman regressions"]
+    buyer --> edge
+    edge --> api
+    api -->|commit| db
+    db -.->|outbox| worker
+    worker -->|PayPal API| pp
+    pp -.->|signed events| hook
+    hook -->|verified inbox| db
+    db -->|synchronous replication| standby
+    db -.->|WAL / restore points| backup
+    api -->|extract| ai
+    worker -->|retrieve| facts
+    facts -.->|accepted facts| db
+    db -.->|projection| search
+    worker -.->|consented task| zap
+    tests -.->|owned test environment only| api

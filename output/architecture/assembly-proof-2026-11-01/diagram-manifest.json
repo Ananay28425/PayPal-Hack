@@ -1,0 +1,160 @@
+{
+  "as_of": "2026-11-01",
+  "status": "Reference designs, not implemented or load-tested",
+  "diagrams": [
+    {
+      "id": "A1-deployment",
+      "title": "A1 | Buildable single-region architecture",
+      "caption": "Render compute with managed synchronous Multi-AZ PostgreSQL. Render Postgres asynchronous HA is only a separately disclosed sandbox shortcut.",
+      "nodes": 14,
+      "edges": 15,
+      "png_pixels": [
+        2879,
+        1434
+      ]
+    },
+    {
+      "id": "A2-purchase-flow",
+      "title": "A2 | Purchase, approval and payment flow",
+      "caption": "Internal approval and PayPal buyer approval are separate. Remote calls occur outside database transactions.",
+      "nodes": 17,
+      "edges": 18,
+      "png_pixels": [
+        1623,
+        2671
+      ]
+    },
+    {
+      "id": "A3-capture-state",
+      "title": "A3 | Capture-operation state machine",
+      "caption": "State applies to one logical capture operation. Refunds are separate capture-linked operations; they do not rewind this machine.",
+      "nodes": 9,
+      "edges": 11,
+      "png_pixels": [
+        1551,
+        1255
+      ]
+    },
+    {
+      "id": "A4-data-model",
+      "title": "A4 | Authoritative data model",
+      "caption": "Tenant-scoped keys and immutable versions. Relationship labels describe cardinality; all foreign keys also carry tenant identity.",
+      "nodes": 13,
+      "edges": 12,
+      "png_pixels": [
+        2031,
+        1613
+      ]
+    },
+    {
+      "id": "A5-security-boundaries",
+      "title": "A5 | Trust and authority boundaries",
+      "caption": "OWASP-aligned control design, not a security certification. External content never grants authority.",
+      "nodes": 13,
+      "edges": 13,
+      "png_pixels": [
+        1630,
+        1655
+      ]
+    },
+    {
+      "id": "A6-counterexample",
+      "title": "A6 | Independent verification harness",
+      "caption": "Production rules may be shared across UI/server. The test oracle must not simply call those same production checks and certify itself.",
+      "nodes": 10,
+      "edges": 12,
+      "png_pixels": [
+        1106,
+        1905
+      ]
+    },
+    {
+      "id": "B1-global-cells",
+      "title": "B1 | Regional cells and separate financial durability",
+      "caption": "Reference production design. Repeat cells by tenant/authority scope; do not interpret three drawn cells as a capacity benchmark.",
+      "nodes": 11,
+      "edges": 15,
+      "png_pixels": [
+        1741,
+        1471
+      ]
+    },
+    {
+      "id": "B2-consistency-ownership",
+      "title": "B2 | Consistency, budgets and ownership",
+      "caption": "CAP is selected per operation. Serializable transactions do not atomically include PayPal or a fulfillment provider.",
+      "nodes": 9,
+      "edges": 8,
+      "png_pixels": [
+        1790,
+        1154
+      ]
+    },
+    {
+      "id": "B3-traffic-surges",
+      "title": "B3 | Traffic admission and backpressure",
+      "caption": "Bounded queues, fair quotas and provider limits control load. More workers do not increase PayPal's contracted capacity.",
+      "nodes": 12,
+      "edges": 11,
+      "png_pixels": [
+        2261,
+        1458
+      ]
+    },
+    {
+      "id": "B4-failover",
+      "title": "B4 | Fenced failover and ambiguous payments",
+      "caption": "Fencing stops new stale dispatch through our gateway. It cannot cancel a request already accepted by PayPal.",
+      "nodes": 11,
+      "edges": 10,
+      "png_pixels": [
+        1300,
+        1877
+      ]
+    },
+    {
+      "id": "B5-funds-reconciliation",
+      "title": "B5 | Funds boundary and reconciliation",
+      "caption": "Assembly Proof stores instructions and financial references. PayPal / the licensed provider handles funds; this design is not a custodial wallet.",
+      "nodes": 10,
+      "edges": 11,
+      "png_pixels": [
+        1114,
+        1565
+      ]
+    },
+    {
+      "id": "B6-security-operations",
+      "title": "B6 | Regional security and operational isolation",
+      "caption": "Use versioned OWASP ASVS requirements, API threat tests and GenAI controls. No diagram proves the absence of vulnerabilities.",
+      "nodes": 10,
+      "edges": 10,
+      "png_pixels": [
+        2434,
+        957
+      ]
+    },
+    {
+      "id": "S1-sponsor-ownership",
+      "title": "S1 | All ten sponsors with bounded responsibilities",
+      "caption": "The same ownership split applies to both architectures. A meaningful integration needs a working contribution; these remain proposed.",
+      "nodes": 16,
+      "edges": 15,
+      "png_pixels": [
+        1756,
+        1743
+      ]
+    },
+    {
+      "id": "S2-value-and-measurement",
+      "title": "S2 | Business value and loss guardrails",
+      "caption": "Hypotheses to measure in a merchant pilot. No conversion lift, loss reduction, profit or first-prize probability is established.",
+      "nodes": 8,
+      "edges": 9,
+      "png_pixels": [
+        1838,
+        920
+      ]
+    }
+  ]
+}

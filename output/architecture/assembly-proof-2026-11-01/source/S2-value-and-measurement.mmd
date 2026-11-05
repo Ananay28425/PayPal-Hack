@@ -1,0 +1,18 @@
+flowchart TD
+    goal["Increase verified useful purchases<br/>subject to financial safety and operating cost"]
+    quality["Assembly<br/>configuration task completion<br/>false-feasible and unknown rates"]
+    authority["PayGuard<br/>unauthorized effects observed<br/>legitimate actions incorrectly blocked"]
+    reliability["Counterexample<br/>verified defects + reproducibility<br/>time to useful regression"]
+    outcomes["Merchant outcomes<br/>paid purchase completion / returns<br/>support effort / repeat usage"]
+    cost["Operating guardrails<br/>model and browser usage<br/>provider calls / infrastructure / support"]
+    net["Merchant contribution measurement<br/>revenue less relevant costs, fees and realized losses<br/>requires actual cost and cohort data"]
+    pilot["Controlled pilot / comparable cohorts<br/>define denominators and observation windows<br/>measure false blocks as well as failures"]
+    goal --> quality
+    goal --> authority
+    goal --> reliability
+    quality -->|hypothesized mechanism| outcomes
+    authority -->|hypothesized mechanism| outcomes
+    reliability -->|hypothesized mechanism| outcomes
+    outcomes --> net
+    cost --> net
+    pilot -->|actual evidence required| net

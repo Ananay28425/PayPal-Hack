@@ -1,0 +1,21 @@
+flowchart TD
+    prepared["PREPARED<br/>buyer-approved provider order + manifest"]
+    invalid["INVALIDATED / EXPIRED<br/>pre-dispatch cancellation or terms changed"]
+    dispatch["DISPATCHING<br/>intent and reservation durable before call"]
+    complete["COMPLETED<br/>verified provider evidence"]
+    failed["TERMINAL_NO_EFFECT<br/>provider contract establishes no capture"]
+    unknown["UNKNOWN<br/>outcome unresolved; reserve remains"]
+    reconcile["RECONCILING<br/>read authoritative resource / supported exact retry"]
+    review["REVIEW_REQUIRED<br/>retention expired or result cannot be established"]
+    fulfill["Fulfillment outbox / status projection<br/>independent idempotent effect boundary"]
+    prepared -->|atomic final checks / reserve| dispatch
+    prepared -->|revoked, expired or changed| invalid
+    dispatch -->|verified success| complete
+    dispatch -->|conclusive refusal| failed
+    dispatch -->|timeout / crash / response loss| unknown
+    unknown --> reconcile
+    reconcile -->|capture confirmed| complete
+    reconcile -->|terminal no-effect evidence| failed
+    reconcile -->|still ambiguous| unknown
+    reconcile -->|cannot safely determine outcome| review
+    complete -.->|commit with result| fulfill
