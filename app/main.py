@@ -25,6 +25,7 @@ from app.paypal import (MockPayPal, ProviderRejected, ProviderUncertain,
                         SandboxPayPal, verified_capture, verified_order_amount)
 from app.store import PaymentOperation, Purchase, make_session_factory, record, utcnow
 from app.counterexamples import run_configuration_cases
+from app.counterexample_runner import run_all_counterexamples
 
 
 def aware(value: datetime) -> datetime:
@@ -116,6 +117,9 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
     def examples():
         return {"broken": BROKEN_EXAMPLE.model_dump(), "repaired": REPAIRED_EXAMPLE.model_dump()}
 
+    @app.get("/api/counterexamples/all")
+    def get_all_counterexamples():
+        return run_all_counterexamples()
     @app.get("/api/counterexamples")
     def counterexamples():
         return {"cases": run_configuration_cases(),

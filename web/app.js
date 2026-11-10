@@ -193,14 +193,56 @@ $("reconcile").addEventListener("click", () => action(async () => {
 }));
 $("counterexamples").addEventListener("click", () => action(async () => {
   const report = await api("/api/counterexamples");
-  const root = $("counterexample-results"); root.replaceChildren();
+  const root = $("counterexample-results");
+  root.replaceChildren();
+
+  const passed = report.cases.filter(item => item.passed).length;
+  const total = report.cases.length;
+
+  const summary = document.createElement("div");
+  summary.className = "summary";
+
+  const badge = document.createElement("span");
+  badge.className = "pill " + (passed === total ? "pass" : "fail");
+  badge.textContent = `${passed}/${total} EXPECTATIONS MET`;
+
+  const description = document.createElement("span");
+  description.textContent = "Independent configuration checks";
+
+  summary.append(badge, description);
+  root.append(summary);
+
   for (const item of report.cases) {
-    const row = document.createElement("p");
-    row.textContent = `${item.passed ? "PASS" : "FAIL"} · ${item.scenario} · ${JSON.stringify(item.observed)}`;
-    row.className = item.passed ? "case-pass" : "case-fail";
-    root.append(row);
+    const card = document.createElement("div");
+    card.className = "check " + (item.passed ? "pass" : "fail");
+
+    const heading = document.createElement("strong");
+    heading.textContent = `${item.passed ? "PASS" : "FAIL"} · ${item.scenario}`;
+
+    const category = document.createElement("small");
+    category.textContent = item.category;
+
+    const rationale = document.createElement("p");
+    rationale.textContent = item.rationale;
+
+    const expected = document.createElement("p");
+    expected.textContent = "EXPECTED: " + JSON.stringify(item.expected);
+
+    const observed = document.createElement("p");
+    observed.textContent = "OBSERVED: " + JSON.stringify(item.observed);
+
+    card.append(heading, category, rationale, expected, observed);
+    root.append(card);
   }
-  toast(`${report.cases.filter(item => item.passed).length}/${report.cases.length} independent expectations met.`);
+
+  const note = document.createElement("p");
+  note.className = "hint";
+  note.textContent =
+    "These results cover bounded configuration fixtures only. " +
+    "They are not a general production safety guarantee.";
+  root.append(note);
+
+  toast(`${passed}/${total} independent expectations met.`);
 }));
 
 (async () => {
