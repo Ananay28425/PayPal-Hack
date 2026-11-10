@@ -23,9 +23,22 @@ class Selection(BaseModel):
     quantity: int = Field(ge=1, le=16)
 
 
+class CustomItem(Selection):
+    name: str = Field(min_length=1, max_length=100)
+    unit_cents: int = Field(ge=1, le=2_000_000)
+    capacity: int | None = Field(ge=0, le=1000)
+
+
+class CustomKit(BaseModel):
+    requirement: str = Field(min_length=1, max_length=100)
+    required_units: int = Field(ge=1, le=1000)
+    items: list[CustomItem] = Field(min_length=1, max_length=20)
+
+
 class Configuration(BaseModel):
     requirements: Requirements
-    selections: list[Selection] = Field(min_length=1, max_length=20)
+    selections: list[Selection] = Field(max_length=20)
+    custom: CustomKit | None = None
 
 
 CATALOGUE: dict[str, dict] = {
@@ -48,6 +61,28 @@ def catalogue() -> list[dict]:
 
 
 def canonical_configuration(config: Configuration) -> dict:
+    if config.custom:
+        if config.selections:
+            raise ValueError("Choose either custom items or recording catalogue selections.")
+        ids = {item.product_id for item in config.custom.items}
+        if len(ids) != len(config.custom.items):
+            raise ValueError("Duplicate custom item ID.")
+        return {
+            "merchant_id": "assembly-demo-merchant",
+            "requirements": {**config.requirements.model_dump(exclude={"people"}),
+                             "requirement": config.custom.requirement,
+                             "required_units": config.custom.required_units},
+            "proof_version": "custom-capacity-v1",
+            "catalogue_source": "buyer_supplied_sandbox_fixture",
+            "lines": [
+                {"product_id": item.product_id, "name": item.name,
+                 "quantity": item.quantity, "unit_cents": item.unit_cents,
+                 "facts": {"capacity": item.capacity}}
+                for item in sorted(config.custom.items, key=lambda item: item.product_id)
+            ],
+        }
+    if not config.selections:
+        raise ValueError("Select at least one catalogue item.")
     quantities: dict[str, int] = {}
     for item in config.selections:
         if item.product_id not in CATALOGUE:
@@ -80,6 +115,24 @@ def digest(value: dict) -> str:
 
 def evaluate(config: Configuration) -> dict:
     snapshot = canonical_configuration(config)
+    if config.custom:
+        total = sum(item.unit_cents * item.quantity for item in config.custom.items)
+        known = all(item.capacity is not None for item in config.custom.items)
+        capacity = sum((item.capacity or 0) * item.quantity for item in config.custom.items)
+        needed = config.custom.required_units
+        checks = [
+            {"code": "custom_capacity", "status": "unknown" if not known else "pass" if capacity >= needed else "fail",
+             "detail": (f"{config.custom.requirement}: {capacity} known units; need {needed}."
+                        + ("" if known else " Some item capacities are missing.")),
+             "repair": "Enter missing capacities or increase the quantity of an item that contributes units."},
+            {"code": "budget", "status": "pass" if total <= config.requirements.budget_cents else "fail",
+             "detail": f"Total ${total / 100:.2f}; budget ${config.requirements.budget_cents / 100:.2f}.",
+             "repair": "Reduce cost or explicitly raise budget."},
+        ]
+        return {"ready": all(check["status"] == "pass" for check in checks),
+                "total_cents": total, "currency": "USD", "checks": checks, "snapshot": snapshot,
+                "digest": digest(snapshot), "catalogue_notice": "Buyer supplied test data. Verify item facts separately."}
+
     counts: dict[str, int] = {}
     items: dict[str, list[dict]] = {}
     total = 0
@@ -144,6 +197,9 @@ def repair(config: Configuration) -> dict:
     if original["ready"]:
         return {"original": original, "proposal": None, "reason": "already_compatible"}
 
+    if config.custom:
+        return repair_custom(config, original)
+
     before = {line["product_id"]: line["quantity"] for line in original["snapshot"]["lines"]}
     people = config.requirements.people
     candidates = []
@@ -202,6 +258,40 @@ def repair(config: Configuration) -> dict:
         "reason": "repair_found",
         "alternatives": alternatives,
     }
+
+
+def repair_custom(config: Configuration, original: dict) -> dict:
+    """Compare a bounded quantity increase for each supplied item."""
+    kit = config.custom
+    assert kit is not None
+    if any(item.capacity is None for item in kit.items):
+        return {"original": original, "proposal": None, "reason": "missing_capacity"}
+    deficit = kit.required_units - sum((item.capacity or 0) * item.quantity for item in kit.items)
+    options = []
+    alternatives = []
+    for index, item in enumerate(kit.items):
+        if deficit <= 0 or not item.capacity:
+            continue
+        extra = (deficit + item.capacity - 1) // item.capacity
+        if item.quantity + extra > 16:
+            continue
+        proposal = config.model_copy(deep=True)
+        proposal.custom.items[index].quantity += extra
+        checked = evaluate(proposal)
+        alternatives.append({"name": item.name, "total_cents": checked["total_cents"],
+                             "ready": checked["ready"],
+                             "blockers": [row for row in checked["checks"] if row["status"] != "pass"]})
+        if checked["ready"]:
+            options.append((extra, checked["total_cents"], item.product_id, proposal, checked, item))
+    if not options:
+        return {"original": original, "proposal": None, "reason": "no_quantity_repair",
+                "alternatives": alternatives}
+    extra, _, _, proposal, checked, item = min(options, key=lambda option: option[:3])
+    return {"original": original, "proposal": proposal.model_dump(), "check": checked,
+            "changes": [{"product_id": item.product_id, "name": item.name,
+                         "before": item.quantity, "after": item.quantity + extra}],
+            "price_delta_cents": checked["total_cents"] - original["total_cents"],
+            "reason": "repair_found", "alternatives": alternatives}
 
 
 BROKEN_EXAMPLE = Configuration(requirements=Requirements(people=4, budget_cents=100_000), selections=[

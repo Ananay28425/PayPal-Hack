@@ -8,7 +8,7 @@
   <meta name="description" content="Assembly Proof is a working agentic commerce prototype. AI proposes a complete kit; deterministic checks and explicit approval protect the PayPal payment flow.">
   <title>Assembly Proof — Agentic Commerce With Proof</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style.css?v=inspection-picker">
 </head>
 <body>
   <header class="site-header" id="top">
@@ -28,7 +28,7 @@
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-stage">
         <div class="hero-copy">
-          <p class="eyebrow"><span class="mini-square"></span> AGENTIC COMMERCE / RECORDING EQUIPMENT</p>
+          <p class="eyebrow"><span class="mini-square"></span> AGENTIC COMMERCE / PURCHASE INSPECTION</p>
           <h1 id="hero-title">Make sure the kit works <span>before you pay.</span></h1>
           <p class="hero-lede">A four-person podcast kit can look complete with four microphones and a two-input interface. Assembly Proof catches the mismatch, finds a compatible replacement within budget, and lets the buyer review the exact kit before PayPal checkout.</p>
         </div>
@@ -38,7 +38,7 @@
     <section class="workspace-shell" id="workspace" aria-labelledby="workspace-title">
       <div class="workspace-heading">
         <div><p class="eyebrow">DEMO CATALOGUE · USD</p><h2 id="workspace-title">Check and repair a kit</h2></div>
-        <div><p>Try the flawed example, edit the quantities, or ask AI to propose a kit.</p><button id="broken" type="button" class="button button-gold" disabled>Check flawed example</button></div>
+        <div><p>Try the recording demo or inspect a kit you define.</p><button id="broken" type="button" class="button button-gold" disabled>Check flawed example</button></div>
       </div>
       <div class="layout">
         <section class="panel setup" aria-labelledby="goal-title">
@@ -47,18 +47,39 @@
           <p class="panel-copy">State the outcome and limit. Review every field and item the agent proposes.</p>
           <label for="token">Demo access token</label>
           <input id="token" type="password" autocomplete="off" placeholder="ASSEMBLY_DEMO_TOKEN">
+          <div id="recording-goal">
           <label for="prompt">What should the agent assemble?</label>
           <textarea id="prompt" rows="4">I want a four-person podcast recording setup with four microphones and headphones under $1,000.</textarea>
           <button id="interpret" type="button" class="agent-button">ASK AI TO PROPOSE A KIT <span aria-hidden="true">↗</span></button>
-          <div class="inline"><div><label for="people">People</label><input id="people" type="number" min="1" max="8" value="4"></div><div><label for="budget">Maximum budget (USD)</label><input id="budget" type="number" min="1" max="20000" value="1000"></div></div>
+          <label for="people">People</label><input id="people" type="number" min="1" max="8" value="4">
           <p id="ai-state" class="hint" aria-live="polite">AI proposals require review. These fields control the actual check.</p>
+          </div>
+          <label for="budget">Maximum budget (USD)</label><input id="budget" type="number" min="1" max="20000" step="0.01" value="1000">
         </section>
         <section class="panel products" aria-labelledby="kit-title">
           <div class="panel-head"><span class="panel-number">02 / CONFIGURATION</span><span class="panel-state">MERCHANT FIXTURE</span></div>
           <h3 id="kit-title">Inspect the complete kit.</h3>
-          <p class="panel-copy">Prices and specifications use invented demo data.</p>
-          <div class="catalogue-heading"><span>CATALOGUE ITEM</span><span>QTY</span></div>
-          <div id="catalogue" class="catalogue"></div>
+          <fieldset id="inspection-options" class="inspection-options" disabled>
+            <legend>What do you want to inspect?</legend>
+            <div class="inspection-choices">
+              <label><input type="radio" name="inspection" value="recording" checked><span>Demo recording kit</span></label>
+              <label><input type="radio" name="inspection" value="custom"><span>Custom kit</span></label>
+            </div>
+          </fieldset>
+          <div id="recording-inspection">
+            <p class="panel-copy">Prices and specifications use invented demo data.</p>
+            <div class="catalogue-heading"><span>CATALOGUE ITEM</span><span>QTY</span></div>
+            <div id="catalogue" class="catalogue"></div>
+          </div>
+          <div id="custom-inspection" hidden>
+            <p>Enter one measurable need and the items that meet it. For example, a workshop needs 24 seats and each bench provides 4. Enter test prices and specs for Sandbox checkout.</p>
+            <label for="custom-requirement">Requirement or unit name</label>
+            <input id="custom-requirement" maxlength="100" placeholder="Workshop seats">
+            <label for="custom-required-units">Units required</label>
+            <input id="custom-required-units" type="number" min="1" max="1000" step="1" value="1">
+            <div id="custom-items"></div>
+            <button id="add-custom-item" class="preset-button" type="button">Add item</button>
+          </div>
           <button id="check" type="button" class="primary">RUN CONFIGURATION CHECK <span aria-hidden="true">↗</span></button>
         </section>
       </div>
