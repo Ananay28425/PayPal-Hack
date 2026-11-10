@@ -240,3 +240,54 @@ body { background: #fbfaf7; }
 .footer-bottom { color: #5d7189; border-color: var(--line); }
 @media (max-width: 880px) { .hero-stage { padding: 72px 24px 86px; } }
 @media (max-width: 620px) { .hero-stage { padding: 62px 18px 72px; } }
+/* AG Grid: Counterexample Lab */
+.counterexample-grid {
+  width: 100%;
+  height: 490px;
+  margin-top: 18px;
+  --ag-font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --ag-font-size: 13px;
+  --ag-background-color: #fff;
+  --ag-foreground-color: var(--ink);
+  --ag-header-background-color: #f0f5fa;
+  --ag-header-foreground-color: var(--deep-blue);
+  --ag-border-color: #d7dfe9;
+  --ag-row-border-color: #e5ebf1;
+  --ag-odd-row-background-color: #fbfaf7;
+  --ag-selected-row-background-color: #e5f0fa;
+  --ag-range-selection-border-color: var(--blue);
+  --ag-wrapper-border-radius: 0px;
+}
+
+.counterexample-grid .ag-header-cell-text {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .035em;
+}
+
+.counterexample-grid .ag-cell {
+  display: flex;
+  align-items: center;
+}
+
+.counterexample-status-pass {
+  color: #176b40;
+  font-weight: 700;
+}
+
+.counterexample-status-fail {
+  color: #b42336;
+  font-weight: 700;
+}
+
+.counterexample-grid .ag-paging-panel {
+  font-size: 11px;
+}
+
+@media (max-width: 620px) {
+  .counterexample-grid {
+    height: 540px;
+    --ag-font-size: 11px;
+  }
+}

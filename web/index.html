@@ -9,6 +9,8 @@
   <title>Assembly Proof — Agentic Commerce With Proof</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.4/styles/ag-grid.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.4/styles/ag-theme-quartz.css">
 </head>
 <body>
   <header class="site-header" id="top">
@@ -89,13 +91,26 @@
     </section>
 
     <section class="lab-shell" id="tests" aria-labelledby="lab-title">
-      <div class="section-rail dark-rail"><span>[05] COUNTEREXAMPLE LAB</span><span>CHALLENGE THE CHECKER</span><span>4 CASES</span></div>
-      <div class="lab-content"><div><p class="eyebrow on-dark">SHOW THE FAILURE, NOT JUST THE SUCCESS</p><h2 id="lab-title">TRY TO BREAK<br><em>THE RULES.</em></h2><p>Independent expectations challenge compatible, incompatible, and incomplete configurations. This is a bounded local test, not a production reliability claim.</p></div><div class="lab-action"><button id="counterexamples" type="button" class="button button-gold">RUN FOUR ADVERSARIAL CASES <span aria-hidden="true">↗</span></button><div id="counterexample-results" class="audit" aria-live="polite"></div></div></div>
+      <div class="section-rail dark-rail"><span>[05] COUNTEREXAMPLE LAB</span><span>CHALLENGE THE CHECKER</span><span>10 CASES</span></div>
+      <div class="lab-content">
+        <div>
+          <p class="eyebrow on-dark">SHOW THE FAILURE, NOT JUST THE SUCCESS</p>
+          <h2 id="lab-title">TRY TO BREAK<br><em>THE RULES.</em></h2>
+          <p>Independent expectations challenge compatible, incompatible, and incomplete configurations. This is a bounded local test, not a production reliability claim.</p>
+        </div>
+        <div class="lab-action">
+          <button id="counterexamples" type="button" class="button button-gold">RUN ALL 10 ADVERSARIAL CASES <span aria-hidden="true">↗</span></button>
+          <div id="counterexample-summary" class="summary" aria-live="polite"></div>
+          <div id="counterexample-grid" class="ag-theme-quartz counterexample-grid"></div>
+          <p class="hint">Deterministic configuration and payment-integrity fixtures. Passing these scenarios is not a production safety guarantee.</p>
+        </div>
+      </div>
     </section>
 
     <footer class="footer"><div class="footer-main"><span>ASSEMBLY<span>PROOF</span></span><p>PLAN WITH AI.<br>PAY WITH PROOF.</p><a href="#workspace">BACK TO THE DEMO <span aria-hidden="true">↗</span></a></div><div class="footer-bottom"><span>INVENTED CATALOGUE · MOCK CHECKOUT IS A SIMULATION · PAYPAL SANDBOX NEEDS TEST CREDENTIALS</span><span>BUILT FOR A BOUNDED AGENTIC COMMERCE DEMO</span></div></footer>
   </main>
   <div id="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@32.3.4/dist/ag-grid-community.min.js" defer></script>
   <script src="/app.js" defer></script>
 </body>
 </html>

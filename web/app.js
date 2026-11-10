@@ -1,6 +1,7 @@
 "use strict";
 
 const state = { catalogue: [], configuration: null, check: null, purchase: null, mode: null };
+let counterexampleGridApi = null;
 const $ = id => document.getElementById(id);
 const token = () => $("token").value.trim();
 const money = cents => `$${(cents / 100).toFixed(2)}`;
@@ -192,57 +193,64 @@ $("reconcile").addEventListener("click", () => action(async () => {
   toast(state.purchase.status === "CAPTURED" ? "Capture verified." : "No verified capture yet.");
 }));
 $("counterexamples").addEventListener("click", () => action(async () => {
-  const report = await api("/api/counterexamples");
-  const root = $("counterexample-results");
-  root.replaceChildren();
+  const report = await api("/api/counterexamples/all");
+  const summaryRoot = $("counterexample-summary");
+  const gridRoot = $("counterexample-grid");
 
-  const passed = report.cases.filter(item => item.passed).length;
-  const total = report.cases.length;
+  summaryRoot.replaceChildren();
+  if (counterexampleGridApi) {
+    counterexampleGridApi.destroy();
+    counterexampleGridApi = null;
+  }
 
-  const summary = document.createElement("div");
-  summary.className = "summary";
+  const cases = report.cases || [];
+  const passed = cases.filter(item => item.passed).length;
+  const total = cases.length;
+  const failed = total - passed;
 
   const badge = document.createElement("span");
-  badge.className = "pill " + (passed === total ? "pass" : "fail");
+  badge.className = "pill " + (failed === 0 ? "pass" : "fail");
   badge.textContent = `${passed}/${total} EXPECTATIONS MET`;
 
   const description = document.createElement("span");
-  description.textContent = "Independent configuration checks";
+  description.textContent = `${total} scenarios · ${failed} failed · Configuration + Payment Integrity`;
+  summaryRoot.append(badge, description);
 
-  summary.append(badge, description);
-  root.append(summary);
-
-  for (const item of report.cases) {
-    const card = document.createElement("div");
-    card.className = "check " + (item.passed ? "pass" : "fail");
-
-    const heading = document.createElement("strong");
-    heading.textContent = `${item.passed ? "PASS" : "FAIL"} · ${item.scenario}`;
-
-    const category = document.createElement("small");
-    category.textContent = item.category;
-
-    const rationale = document.createElement("p");
-    rationale.textContent = item.rationale;
-
-    const expected = document.createElement("p");
-    expected.textContent = "EXPECTED: " + JSON.stringify(item.expected);
-
-    const observed = document.createElement("p");
-    observed.textContent = "OBSERVED: " + JSON.stringify(item.observed);
-
-    card.append(heading, category, rationale, expected, observed);
-    root.append(card);
+  // AG Grid 32's UMD build may expose the community module registry.
+  // Register once when available; otherwise the bundled legacy API can run directly.
+  if (agGrid.ModuleRegistry && agGrid.AllCommunityModule && !window.__assemblyAgGridRegistered) {
+    agGrid.ModuleRegistry.registerModules([agGrid.AllCommunityModule]);
+    window.__assemblyAgGridRegistered = true;
   }
 
-  const note = document.createElement("p");
-  note.className = "hint";
-  note.textContent =
-    "These results cover bounded configuration fixtures only. " +
-    "They are not a general production safety guarantee.";
-  root.append(note);
+  const columnDefs = [
+    { headerName: "SCENARIO", field: "scenario", minWidth: 210, flex: 1.5, filter: "agTextColumnFilter" },
+    { headerName: "CATEGORY", field: "category", minWidth: 170, flex: 1, filter: "agTextColumnFilter" },
+    { headerName: "EXPECTED", field: "expected", minWidth: 125, valueFormatter: params => JSON.stringify(params.value) },
+    { headerName: "OBSERVED", field: "observed", minWidth: 125, valueFormatter: params => JSON.stringify(params.value) },
+    {
+      headerName: "STATUS", colId: "status", minWidth: 105, maxWidth: 115,
+      valueGetter: params => params.data.passed ? "PASS" : "FAIL",
+      cellClassRules: {
+        "counterexample-status-pass": params => params.value === "PASS",
+        "counterexample-status-fail": params => params.value === "FAIL"
+      },
+      filter: "agTextColumnFilter"
+    },
+    { headerName: "RATIONALE", field: "rationale", minWidth: 260, flex: 2, filter: "agTextColumnFilter", wrapText: true, autoHeight: true }
+  ];
 
-  toast(`${passed}/${total} independent expectations met.`);
+  counterexampleGridApi = agGrid.createGrid(gridRoot, {
+    columnDefs,
+    rowData: cases,
+    defaultColDef: { sortable: true, resizable: true, filter: true, floatingFilter: true },
+    pagination: true,
+    paginationPageSize: 10,
+    paginationPageSizeSelector: [10, 20, 50],
+    animateRows: true
+  });
+
+  toast(`${passed}/${total} counterexample expectations met.`);
 }));
 
 (async () => {
