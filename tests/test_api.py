@@ -2,6 +2,9 @@ import os
 from pathlib import Path
 import asyncio
 import sys
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier, Lock
+from uuid import uuid4
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -13,9 +16,9 @@ os.environ.setdefault("ASSEMBLY_DATABASE_URL", "sqlite://")
 from fastapi.testclient import TestClient
 import pytest
 
-from app.domain import REPAIRED_EXAMPLE, evaluate
+from app.domain import BROKEN_EXAMPLE, CATALOGUE, REPAIRED_EXAMPLE, evaluate
 from app.main import create_app
-from app.paypal import MockPayPal, ProviderUncertain
+from app.paypal import MockPayPal, ProviderUncertain, SandboxPayPal
 
 
 @pytest.fixture
@@ -28,6 +31,26 @@ def client(tmp_path: Path):
 
 def auth():
     return {"X-Demo-Token": "test-only-demo-token"}
+
+
+def test_sponsor_status_and_evidence_boundaries(client, monkeypatch):
+    from app import sponsors
+
+    monkeypatch.delenv("CHANNEL3_API_KEY", raising=False)
+    status = client.get("/api/sponsors").json()
+    assert set(status) == {"AG Grid", "APIMatic", "Astropods", "Bryntum", "Channel3",
+                           "Elastic", "Kernel", "Postman", "Render", "Zapier"}
+    endpoint = "/api/sponsors/evidence/channel3"
+    assert client.post(endpoint).status_code == 401
+    assert client.post(endpoint, headers=auth()).status_code == 503
+    monkeypatch.setenv("CHANNEL3_API_KEY", "fixture-secret")
+
+    async def search():
+        return [{"id": "fixture-variant", "title": "Reference interface"}]
+
+    monkeypatch.setattr(sponsors, "channel3", search)
+    assert client.post(endpoint, headers=auth()).json()["result"][0]["id"] == "fixture-variant"
+    assert client.post("/api/sponsors/zapier/unknown", headers=auth()).status_code == 503
 
 
 def prepared(client: TestClient, key="business-intent-1"):
@@ -43,6 +66,80 @@ def test_auth_and_approval_digest(client):
     mismatch = client.post(f"/api/purchases/{purchase['id']}/approve", headers=auth(), json={"digest": "0" * 64})
     assert mismatch.status_code == 409
     assert client.get(f"/api/purchases/{purchase['id']}", headers=auth()).json()["status"] == "DRAFT"
+
+
+def test_repair_preserves_budget_and_checkout_rejects_stale_proof(client):
+    config = BROKEN_EXAMPLE.model_dump()
+    response = client.post("/api/repair", json=config)
+    assert response.status_code == 200
+    result = response.json()
+    assert result["original"]["ready"] is False
+    assert result["check"]["ready"] is True
+    assert result["proposal"]["requirements"] == config["requirements"]
+    assert result["price_delta_cents"] == 20_000
+    assert {item["product_id"]: (item["before"], item["after"]) for item in result["changes"]} == {
+        "amp-4": (0, 1), "interface-2": (1, 0), "interface-8": (0, 1),
+    }
+
+    payload = {"configuration": result["proposal"], "intent_key": "reviewed-kit-01",
+               "expected_digest": result["original"]["digest"]}
+    assert client.post("/api/purchases", headers=auth(), json=payload).status_code == 409
+    payload["expected_digest"] = result["check"]["digest"]
+    prepared = client.post("/api/purchases", headers=auth(), json=payload)
+    assert prepared.status_code == 200
+    assert prepared.json()["digest"] == result["check"]["digest"]
+    assert prepared.json()["status"] == "DRAFT"
+
+    config["requirements"]["budget_cents"] = 75_000
+    blocked = client.post("/api/repair", json=config).json()
+    assert blocked["proposal"] is None
+    assert blocked["reason"] == "no_compatible_kit"
+
+
+def test_changed_specs_invalidate_proof_even_with_same_total(client, monkeypatch):
+    config = REPAIRED_EXAMPLE.model_dump()
+    checked = client.post("/api/check", json=config).json()
+    monkeypatch.setitem(CATALOGUE["interface-8"], "mic_inputs", 6)
+    revised = client.post("/api/check", json=config).json()
+    assert revised["ready"] and revised["total_cents"] == checked["total_cents"]
+    assert revised["digest"] != checked["digest"]
+    response = client.post("/api/purchases", headers=auth(), json={
+        "configuration": config, "intent_key": "changed-facts", "expected_digest": checked["digest"],
+    })
+    assert response.status_code == 409
+
+
+def test_itemized_sandbox_order_accepts_payer_action_required(tmp_path, monkeypatch):
+    provider = SandboxPayPal("fixture-client-id", "fixture-client-secret")
+    calls = []
+
+    async def provider_request(method, path, *, request_id=None, body=None):
+        calls.append((method, path, request_id, body))
+        return {
+            "id": "ORD-FIXTURE-1",
+            "status": "PAYER_ACTION_REQUIRED",
+            "links": [{"rel": "payer-action", "href": "https://www.sandbox.paypal.com/checkoutnow?token=ORD-FIXTURE-1"}],
+        }
+
+    monkeypatch.setattr(provider, "_request", provider_request)
+    app = create_app(database_url=f"sqlite:///{tmp_path / 'sandbox-contract.db'}",
+                     payment_mode="sandbox", demo_token="test-only-demo-token", provider=provider)
+    with TestClient(app) as client:
+        purchase = prepared(client)
+        response = client.post(f"/api/purchases/{purchase['id']}/approve", headers=auth(),
+                               json={"digest": purchase["digest"]})
+    assert response.status_code == 200
+    assert response.json()["status"] == "AWAITING_BUYER"
+    [(method, path, request_id, payload)] = calls
+    assert (method, path) == ("POST", "/v2/checkout/orders")
+    assert len(request_id) == 36
+    [unit] = payload["purchase_units"]
+    assert unit["custom_id"] == purchase["digest"]
+    assert unit["reference_id"] == purchase["id"]
+    assert unit["amount"]["breakdown"]["item_total"] == {"value": "810.00", "currency_code": "USD"}
+    assert {item["sku"]: item["quantity"] for item in unit["items"]} == {
+        "mic-xlr": "4", "headphones": "4", "interface-8": "1", "amp-4": "1",
+    }
 
 
 def test_full_mock_payment_and_no_duplicate_capture(client):
@@ -63,6 +160,43 @@ def test_full_mock_payment_and_no_duplicate_capture(client):
     assert again.json()["provider_capture_id"] == captured.json()["provider_capture_id"]
     events = client.get(url + "/audit", headers=auth()).json()
     assert [e["type"] for e in events].count("capture_verified") == 1
+
+
+@pytest.mark.skipif(not os.getenv("ASSEMBLY_TEST_POSTGRES_URL"),
+                    reason="requires an isolated PostgreSQL test database")
+def test_two_api_instances_dispatch_one_capture():
+    class RacingProvider(MockPayPal):
+        def __init__(self):
+            super().__init__()
+            self.preflight = Barrier(2)
+            self.lock = Lock()
+            self.calls = 0
+
+        async def get_order(self, order_id, purchase):
+            order = await super().get_order(order_id, purchase)
+            await asyncio.to_thread(self.preflight.wait, 10)
+            return order
+
+        async def capture(self, order_id, request_id, purchase):
+            with self.lock:
+                self.calls += 1
+            return await super().capture(order_id, request_id, purchase)
+
+    provider = RacingProvider()
+    settings = {"database_url": os.environ["ASSEMBLY_TEST_POSTGRES_URL"], "payment_mode": "mock",
+                "demo_token": "test-only-demo-token", "provider": provider}
+    with TestClient(create_app(**settings)) as first, TestClient(create_app(**settings)) as second:
+        purchase = prepared(first, key=f"postgres-race-{uuid4()}")
+        url = f"/api/purchases/{purchase['id']}"
+        assert first.post(f"{url}/approve", headers=auth(), json={"digest": purchase["digest"]}).status_code == 200
+        assert first.post(f"{url}/mock-buyer-approve", headers=auth()).status_code == 200
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            attempts = [pool.submit(client.post, f"{url}/capture", headers=auth()) for client in (first, second)]
+            assert sorted(attempt.result(timeout=20).status_code for attempt in attempts) == [200, 409]
+        captured = second.get(url, headers=auth()).json()
+        assert captured["status"] == "CAPTURED"
+        assert provider.calls == 1
+        assert first.post(f"{url}/capture", headers=auth()).json()["provider_capture_id"] == captured["provider_capture_id"]
 
 
 def test_business_intent_key_cannot_change_terms(client):

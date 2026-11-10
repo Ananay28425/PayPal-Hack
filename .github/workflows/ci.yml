@@ -1,4 +1,4 @@
-name: Python regression suite
+name: Assembly Proof regressions
 on:
   push:
   pull_request:
@@ -18,3 +18,21 @@ jobs:
           ASSEMBLY_PAYMENT_MODE: mock
           ASSEMBLY_DATABASE_URL: sqlite://
         run: python -m pytest tests -q
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Verify grid asset and Postman checkout contract
+        env:
+          ASSEMBLY_DEMO_TOKEN: test-only-demo-token
+          ASSEMBLY_PAYMENT_MODE: mock
+          ASSEMBLY_DATABASE_URL: sqlite:///./ci-demo.db
+          ASSEMBLY_PUBLIC_URL: http://127.0.0.1:8000
+        run: |
+          python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          curl --fail --silent --show-error --retry 10 --retry-connrefused --retry-delay 1 http://127.0.0.1:8000/api/health
+          curl --fail --silent --show-error --output /dev/null http://127.0.0.1:8000/vendor/ag-grid-community.min.js
+          npx --yes newman@6.2.1 run postman/Assembly-Proof-Mock.postman_collection.json --env-var "baseUrl=$ASSEMBLY_PUBLIC_URL" --env-var "demoToken=$ASSEMBLY_DEMO_TOKEN" --bail

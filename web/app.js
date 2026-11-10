@@ -1,9 +1,114 @@
 "use strict";
 
-const state = { catalogue: [], configuration: null, check: null, purchase: null, mode: null };
+const state = {
+  catalogue: [], check: null, purchase: null, mode: null, revision: 0, busy: false, repairGrid: null
+};
+let gridLibrary;
 const $ = id => document.getElementById(id);
 const token = () => $("token").value.trim();
 const money = cents => `$${(cents / 100).toFixed(2)}`;
+
+const sponsorRoles = {
+  "AG Grid": "Compare repairs and their blockers",
+  APIMatic: "Ground the PayPal timeout contract",
+  Astropods: "Propose a kit through the hosted planner",
+  Bryntum: "Visualize delivery and recording dates",
+  Channel3: "Discover reference product variants",
+  Elastic: "Retrieve reviewed variant evidence",
+  Kernel: "Inspect the manufacturer specification",
+  Postman: "Exercise checkout and replay",
+  Render: "Host the checkout API and reconciliation worker",
+  Zapier: "Trigger an opted-in setup workflow after capture"
+};
+api("/api/sponsors").then(status => {
+  for (const [name, role] of Object.entries(sponsorRoles)) {
+    const item = document.createElement("li");
+    item.textContent = `${name} · ${role} · ${status[name]}`;
+    $("sponsor-status").append(item);
+  }
+}).catch(error => { $("sponsor-status").textContent = error.message; });
+
+for (const button of document.querySelectorAll("[data-evidence]")) {
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    $("sponsor-result").textContent = "Checking reference evidence…";
+    try {
+      const { result } = await api(`/api/sponsors/evidence/${button.dataset.evidence}`, "POST");
+      $("sponsor-result").textContent = Array.isArray(result) && !result.length
+        ? "No matching reference evidence." : JSON.stringify(result, null, 2);
+    } catch (error) {
+      $("sponsor-result").textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
+let setupScheduler;
+$("show-schedule").addEventListener("click", async event => {
+  const button = event.currentTarget;
+  const arrival = $("arrival-day").valueAsNumber;
+  const recording = $("setup-day").valueAsNumber;
+  const output = $("schedule-status");
+  setupScheduler?.destroy();
+  setupScheduler = undefined;
+  if (!Number.isFinite(arrival) || !Number.isFinite(recording)) {
+    output.textContent = "Choose both dates.";
+    return;
+  }
+  const day = 86400000;
+  const localDate = value => {
+    const date = new Date(value);
+    return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  };
+  const readiness = arrival + day <= recording ? "Ready for recording." : "Allow one day after delivery to set up.";
+  output.textContent = readiness;
+  button.disabled = true;
+  try {
+    const { Scheduler } = await import("/vendor/bryntum/scheduler.module.js");
+    for (const file of ["scheduler.css", "stockholm-light.css"]) {
+      const url = "/vendor/bryntum/" + file;
+      if (document.querySelector(`link[href="${url}"]`)) continue;
+      const theme = document.createElement("link");
+      theme.rel = "stylesheet";
+      theme.href = url;
+      document.head.append(theme);
+    }
+    setupScheduler = new Scheduler({
+      appendTo: $("setup-schedule"), height: 235, readOnly: true, viewPreset: "dayAndWeek",
+      startDate: localDate(Math.min(arrival, recording) - day),
+      endDate: localDate(Math.min(Math.max(arrival, recording) + 2 * day, Math.min(arrival, recording) + 31 * day)),
+      columns: [{ text: "Milestone", field: "name", width: 130 }],
+      resources: [{ id: 1, name: "Recording kit" }],
+      events: [
+        { id: 1, resourceId: 1, name: "Setup after delivery", startDate: localDate(arrival), endDate: localDate(arrival + day) },
+        { id: 2, resourceId: 1, name: "First recording", startDate: localDate(recording), endDate: localDate(recording + day) }
+      ]
+    });
+  } catch {
+    output.textContent = readiness + " Bryntum Scheduler assets or trial activation are unavailable.";
+  } finally {
+    button.disabled = false;
+  }
+});
+
+$("setup-reminder").addEventListener("click", async event => {
+  const button = event.currentTarget;
+  const output = $("reminder-result");
+  if (state.mode !== "sandbox" || state.purchase?.status !== "CAPTURED") {
+    output.textContent = "Complete a verified Sandbox purchase first.";
+    return;
+  }
+  button.disabled = true;
+  try {
+    const result = await api(`/api/sponsors/zapier/${state.purchase.id}`, "POST");
+    output.textContent = result.status;
+  } catch (error) {
+    output.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
 
 function toast(message, error = false) {
   const el = $("toast");
@@ -46,9 +151,17 @@ function setConfig(config) {
 }
 
 function invalidateCheck() {
+  state.revision++;
   state.check = null;
   $("result").textContent = "Run the check to verify these exact selections.";
+  clearRepair();
   updateActions();
+}
+
+function clearRepair() {
+  state.repairGrid?.destroy();
+  state.repairGrid = null;
+  $("repair-result").replaceChildren();
 }
 
 function renderCatalogue() {
@@ -90,6 +203,116 @@ function renderCheck(result) {
   root.append(summary, checks);
 }
 
+async function checkCurrentKit() {
+  const revision = state.revision;
+  const result = await api("/api/check", "POST", currentConfig());
+  if (revision !== state.revision) return;
+  state.check = result;
+  clearRepair();
+  renderCheck(result);
+  $("proof").scrollIntoView();
+}
+
+function loadGrid() {
+  if (!gridLibrary) {
+    gridLibrary = new Promise(resolve => {
+      const script = document.createElement("script");
+      script.src = "/vendor/ag-grid-community.min.js";
+      script.onload = () => resolve(window.agGrid);
+      script.onerror = () => resolve(null);
+      document.head.append(script);
+    });
+  }
+  return gridLibrary;
+}
+
+function comparisonPanel(alternatives) {
+  const details = document.createElement("details");
+  const summary = document.createElement("summary");
+  summary.textContent = "Compare checked alternatives";
+  const grid = document.createElement("div");
+  grid.className = "candidate-grid";
+  const evidence = document.createElement("p");
+  evidence.className = "candidate-evidence";
+  evidence.setAttribute("aria-live", "polite");
+  evidence.textContent = "Select a row to see why it passes or is blocked.";
+  const rows = alternatives.map(option => ({
+    ...option,
+    layout: option.name + (option.amplifiers ? ` + ${option.amplifiers} headphone amp${option.amplifiers > 1 ? "s" : ""}` : ""),
+    decision: option.ready ? "Compatible" : "Blocked",
+  }));
+
+  function showEvidence(row) {
+    const reason = row.ready ? "All checks passed for this layout."
+      : row.blockers.map(check => check.detail).join(" ");
+    evidence.textContent = `${row.name}: ${reason}`;
+  }
+
+  // Keep the evidence readable if the optional local bundle isn't installed.
+  for (const row of rows) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "preset-button";
+    button.textContent = `${row.layout} · ${money(row.total_cents)} · ${row.decision}`;
+    button.addEventListener("click", () => showEvidence(row));
+    grid.append(button);
+  }
+  details.addEventListener("toggle", async () => {
+    if (!details.open || state.repairGrid) return;
+    const library = await loadGrid();
+    if (!library || !details.open || !details.isConnected || state.repairGrid) return;
+    grid.replaceChildren();
+    state.repairGrid = library.createGrid(grid, {
+      rowData: rows,
+      columnDefs: [
+        { field: "layout", headerName: "Interface and monitoring", minWidth: 165, flex: 2, wrapText: true, autoHeight: true },
+        { field: "total_cents", headerName: "Total", width: 105, filter: "agNumberColumnFilter", valueFormatter: ({value}) => money(value) },
+        { field: "decision", headerName: "Result", width: 115, filter: "agTextColumnFilter" },
+      ],
+      domLayout: "autoHeight",
+      onRowClicked: event => showEvidence(event.data),
+      onCellKeyDown: event => {
+        if (event.event.key === "Enter") showEvidence(event.data);
+      },
+    });
+  });
+  details.append(summary, grid, evidence);
+  return details;
+}
+
+function renderRepair(repair) {
+  clearRepair();
+  const root = $("repair-result");
+  const heading = document.createElement("h3");
+  if (!repair.proposal) {
+    heading.textContent = "No compatible kit found within this budget";
+    root.append(heading);
+    if (repair.alternatives?.length) root.append(comparisonPanel(repair.alternatives));
+    return;
+  }
+  heading.textContent = "Review the proposed changes";
+  const price = document.createElement("p");
+  const delta = repair.price_delta_cents;
+  const difference = delta === 0 ? "same price" : `${money(Math.abs(delta))} ${delta > 0 ? "more" : "less"}`;
+  price.textContent = `${money(repair.original.total_cents)} before · ${money(repair.check.total_cents)} after (${difference})`;
+  const list = document.createElement("ul");
+  for (const change of repair.changes) {
+    const item = document.createElement("li");
+    item.textContent = `${change.name}: ${change.before} → ${change.after}`;
+    list.append(item);
+  }
+  const apply = document.createElement("button");
+  apply.type = "button";
+  apply.className = "button button-gold";
+  apply.textContent = "Apply and recheck kit";
+  apply.addEventListener("click", () => action(async () => {
+    setConfig(repair.proposal);
+    await checkCurrentKit();
+  }));
+  root.append(heading, price, list, apply);
+  if (repair.alternatives?.length) root.append(comparisonPanel(repair.alternatives));
+}
+
 function renderPurchase() {
   const root = $("purchase"); root.replaceChildren();
   const purchase = state.purchase;
@@ -102,8 +325,23 @@ function renderPurchase() {
     box.append(name, text); facts.append(box);
   }
   root.append(facts);
+  const items = document.createElement("ul");
+  items.className = "frozen-items";
+  for (const line of purchase.snapshot.lines) {
+    const item = document.createElement("li");
+    const product = state.catalogue.find(product => product.id === line.product_id);
+    item.textContent = `${line.quantity} × ${line.name ?? product?.name ?? line.product_id} · ${money(line.unit_cents)} each`;
+    items.append(item);
+  }
+  root.append(items);
+  if (purchase.provider_capture_id) {
+    const receipt = document.createElement("p");
+    receipt.textContent = `${state.mode === "mock" ? "Simulated capture" : "PayPal capture"}: ${purchase.provider_capture_id}`;
+    root.append(receipt);
+  }
   const digest = document.createElement("div"); digest.className = "digest";
-  digest.textContent = `Merchant: ${purchase.snapshot.merchant_id} · Frozen terms SHA-256: ${purchase.digest}`;
+  const version = purchase.snapshot.proof_version;
+  digest.textContent = `Merchant: ${purchase.snapshot.merchant_id} · ${version ? "Rules: " + version + " · " : ""}Frozen terms SHA-256: ${purchase.digest}`;
   root.append(digest);
   const frozen = document.createElement("p"); frozen.className = "hint";
   frozen.textContent = "This purchase remains frozen if you edit the kit above. Start a new purchase for changed terms.";
@@ -118,6 +356,8 @@ function renderPurchase() {
 }
 
 function updateActions() {
+  $("repair").disabled = !state.check || state.check.ready;
+  $("review-terms").hidden = !state.check?.ready;
   $("prepare").disabled = !state.check?.ready || !!state.purchase;
   $("approve").disabled = !state.purchase || state.purchase.status !== "DRAFT";
   $("buyer").disabled = state.mode !== "mock" || !state.purchase || state.purchase.status !== "AWAITING_BUYER" || state.purchase.mock_buyer_approved;
@@ -137,41 +377,50 @@ async function refreshAudit() {
 }
 
 async function action(work) {
+  if (state.busy) return;
+  state.busy = true;
   try { await work(); updateActions(); await refreshAudit(); }
   catch (error) { toast(error.message, true); }
+  finally { state.busy = false; }
 }
 
 $("token").value = sessionStorage.getItem("assembly-token") || "";
 $("token").addEventListener("change", () => sessionStorage.setItem("assembly-token", token()));
 for (const id of ["people", "budget"]) $(id).addEventListener("input", invalidateCheck);
 $("restart").addEventListener("click", () => {
+  if (state.busy) return;
   state.purchase = null;
-  state.check = null;
   sessionStorage.removeItem("assembly-purchase");
   history.replaceState(null, "", "/");
   $("audit").replaceChildren();
-  $("result").textContent = "Run the check to see specific conflicts and repairs.";
-  updateActions();
+  invalidateCheck();
 });
 $("interpret").addEventListener("click", () => action(async () => {
+  const revision = state.revision;
   const data = await api("/api/plan", "POST", { text: $("prompt").value });
+  if (revision !== state.revision) return;
   setConfig(data.proposal);
   state.check = data.check;
   renderCheck(data.check);
+  $("proof").scrollIntoView();
   $("ai-state").textContent = data.needs_confirmation
     ? "The agent filled missing requirements. Review the fields and kit before payment."
     : "The agent proposed this kit. The separate checker evaluated it; review every item.";
   toast(data.check.ready ? "Agent proposal passed the configuration check." : "Agent proposal needs repair before checkout.");
 }));
-$("check").addEventListener("click", () => action(async () => {
-  state.configuration = currentConfig(); state.check = await api("/api/check", "POST", state.configuration);
-  renderCheck(state.check);
+$("check").addEventListener("click", () => action(checkCurrentKit));
+$("repair").addEventListener("click", () => action(async () => {
+  const revision = state.revision;
+  const result = await api("/api/repair", "POST", currentConfig());
+  if (revision !== state.revision) return;
+  state.check = result.original;
+  renderCheck(result.original);
+  renderRepair(result);
 }));
 $("prepare").addEventListener("click", () => action(async () => {
-  const config = currentConfig();
-  const latest = await api("/api/check", "POST", config);
-  if (!latest.ready || latest.digest !== state.check.digest) throw new Error("Kit changed; check it again.");
-  state.purchase = await api("/api/purchases", "POST", { configuration: config, intent_key: crypto.randomUUID() });
+  state.purchase = await api("/api/purchases", "POST", {
+    configuration: currentConfig(), expected_digest: state.check.digest, intent_key: crypto.randomUUID()
+  });
   sessionStorage.setItem("assembly-purchase", state.purchase.id);
   toast("Exact purchase terms frozen for approval.");
 }));
@@ -210,10 +459,13 @@ $("counterexamples").addEventListener("click", () => action(async () => {
     state.mode = health.payment_mode; state.catalogue = catalogue.products;
     $("mode").textContent = health.payment_mode === "mock" ? "MOCK CHECKOUT" : "PAYPAL SANDBOX";
     $("interpret").disabled = !health.ai_configured;
-    if (!health.ai_configured) $("ai-state").textContent = "AI planning needs OPENAI_API_KEY. Manual examples remain available.";
+    if (!health.ai_configured) $("ai-state").textContent = "Configure OpenAI or Astropods to use AI planning. Manual examples remain available.";
     renderCatalogue(); setConfig(examples.broken);
-    $("broken").addEventListener("click", () => setConfig(examples.broken));
-    $("repaired").addEventListener("click", () => setConfig(examples.repaired));
+    $("broken").disabled = false;
+    $("broken").addEventListener("click", () => action(async () => {
+      setConfig(examples.broken);
+      await checkCurrentKit();
+    }));
     const previous = new URLSearchParams(location.search).get("purchase") || sessionStorage.getItem("assembly-purchase");
     if (previous && token()) {
       state.purchase = await api(`/api/purchases/${previous}`);

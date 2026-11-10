@@ -11,8 +11,8 @@ The reference site is an event website. Assembly Proof keeps its product-specifi
 
 | Reference pattern | Assembly Proof implementation |
 | --- | --- |
-| Large, light-weight uppercase editorial headline | Two-line commerce statement on a warm white canvas |
-| Fluorescent primary action and thin outlined secondary action | PayPal gold primary action and outlined secondary action |
+| Large editorial headline | Concrete buyer problem on a warm white canvas |
+| High-contrast primary action | PayPal gold for the next action in the demo |
 | Small mono labels, section numbers, and thin rules | Indexed rails and panel metadata throughout the page |
 | Clear section changes | Warm white, soft neutral, and light blue surfaces |
 | Sharp controls | Square panels, dividers, and readable status text |
@@ -30,12 +30,11 @@ The implementation uses these as interface colors, without presenting Assembly P
 
 ## Product hierarchy
 
-1. **Hero:** “AI builds the cart. You own the decision.” The copy names planning, independent checking, explicit approval, and PayPal execution.
-2. **System:** short text explains the purchasing problem and links to the demo.
-3. **Working demo:** goal, bounded AI catalogue proposal, editable kit, and deterministic check.
-4. **Proof:** the result shows specific pass/fail/unknown checks and repair guidance.
-5. **Payment:** frozen terms, user approval, mock or sandbox buyer step, verified capture, and audit events.
-6. **Counterexample lab:** independently specified fixture outcomes remain visible.
+1. **Hero** introduces the four-person kit with too few inputs and leads straight into the check.
+2. **Workspace** exposes the editable goal and items, with a one-click flawed example and a bounded AI proposal when enabled.
+3. **Proof** shows which checks fail, explains the repair and price change, and lets the buyer compare the checked alternatives before applying one.
+4. **Payment** shows the frozen itemized offer, buyer approval, verified capture, and audit events.
+5. **Counterexample lab** runs independently specified fixture outcomes.
 
 ## Behavior and limits
 

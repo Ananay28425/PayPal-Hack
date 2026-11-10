@@ -240,3 +240,37 @@ body { background: #fbfaf7; }
 .footer-bottom { color: #5d7189; border-color: var(--line); }
 @media (max-width: 880px) { .hero-stage { padding: 72px 24px 86px; } }
 @media (max-width: 620px) { .hero-stage { padding: 62px 18px 72px; } }
+
+.hero-stage { padding-block: clamp(36px, 6vw, 80px); }
+.hero h1 {
+  max-width: 24ch;
+  font-size: clamp(42px, 6vw, 82px);
+  letter-spacing: -0.055em;
+  text-transform: none;
+}
+.hero-lede { margin-bottom: 0; }
+.workspace-heading, .proof-heading, .payment-heading { padding-block: 38px 24px; }
+.workspace-heading h2, .proof-heading h2, .payment-heading h2 {
+  font-size: clamp(32px, 4vw, 55px);
+  text-transform: none;
+}
+.workspace-heading > div > p:not(.eyebrow) { color: var(--muted); }
+#repair-result:not(:empty) {
+  margin-top: 16px;
+  padding: 20px;
+  background: #f0f5fa;
+  border: 1px solid #c8d7e6;
+}
+#repair-result li, .frozen-items li { margin-block: 8px; }
+#repair-result details { margin-top: 20px; }
+#repair-result summary { cursor: pointer; color: var(--deep-blue); font-weight: 600; }
+.candidate-grid { display: grid; gap: 8px; margin-top: 12px; min-width: 0; }
+.candidate-grid > button { white-space: normal; text-align: left; }
+.candidate-evidence { color: var(--muted); margin-bottom: 0; }
+.frozen-items { padding-left: 24px; }
+#review-terms { margin-top: 16px; }
+#review-terms[hidden] { display: none; }
+.sponsor-panel { margin: 2rem auto; width: min(92%, 1100px); padding: clamp(1rem, 4vw, 2.5rem); }
+.sponsor-panel li { margin-block: .5rem; }
+.sponsor-panel pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.sponsor-panel input { max-width: 15rem; margin-bottom: 1rem; }
