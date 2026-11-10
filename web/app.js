@@ -11,14 +11,9 @@ const money = cents => `$${(cents / 100).toFixed(2)}`;
 const sponsorRoles = {
   "AG Grid": "Compare repairs and their blockers",
   APIMatic: "Ground the PayPal timeout contract",
-  Astropods: "Propose a kit through the hosted planner",
   Bryntum: "Visualize delivery and recording dates",
   Channel3: "Discover reference product variants",
-  Elastic: "Retrieve reviewed variant evidence",
-  Kernel: "Inspect the manufacturer specification",
   Postman: "Exercise checkout and replay",
-  Render: "Host the checkout API and reconciliation worker",
-  Zapier: "Trigger an opted-in setup workflow after capture"
 };
 api("/api/sponsors").then(status => {
   for (const [name, role] of Object.entries(sponsorRoles)) {
@@ -87,24 +82,6 @@ $("show-schedule").addEventListener("click", async event => {
     });
   } catch {
     output.textContent = readiness + " Bryntum Scheduler assets or trial activation are unavailable.";
-  } finally {
-    button.disabled = false;
-  }
-});
-
-$("setup-reminder").addEventListener("click", async event => {
-  const button = event.currentTarget;
-  const output = $("reminder-result");
-  if (state.mode !== "sandbox" || state.purchase?.status !== "CAPTURED") {
-    output.textContent = "Complete a verified Sandbox purchase first.";
-    return;
-  }
-  button.disabled = true;
-  try {
-    const result = await api(`/api/sponsors/zapier/${state.purchase.id}`, "POST");
-    output.textContent = result.status;
-  } catch (error) {
-    output.textContent = error.message;
   } finally {
     button.disabled = false;
   }
@@ -459,7 +436,7 @@ $("counterexamples").addEventListener("click", () => action(async () => {
     state.mode = health.payment_mode; state.catalogue = catalogue.products;
     $("mode").textContent = health.payment_mode === "mock" ? "MOCK CHECKOUT" : "PAYPAL SANDBOX";
     $("interpret").disabled = !health.ai_configured;
-    if (!health.ai_configured) $("ai-state").textContent = "Configure OpenAI or Astropods to use AI planning. Manual examples remain available.";
+    if (!health.ai_configured) $("ai-state").textContent = "Configure OpenAI to use AI planning. Manual examples remain available.";
     renderCatalogue(); setConfig(examples.broken);
     $("broken").disabled = false;
     $("broken").addEventListener("click", () => action(async () => {

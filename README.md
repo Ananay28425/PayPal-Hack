@@ -37,7 +37,7 @@ $env:ASSEMBLY_PUBLIC_URL='https://your-public-demo.example'
 
 The sandbox adapter has **not** yet been exercised with this team's credentials. Its create, read, and capture calls follow the [Orders v2 API](https://developer.paypal.com/api/orders/v2) and [idempotency guidance](https://developer.paypal.com/api/rest/reference/idempotency). Test it with owned sandbox accounts before any public demo. If a provider response is ambiguous, the original operation remains unresolved; reconciliation reads the original order. The app never creates a replacement capture automatically.
 
-For a hosted sandbox demo, `render.yaml` defines a web service and a bounded reconciliation worker. It expects an external managed PostgreSQL URL using SQLAlchemy's `postgresql+psycopg://` scheme. Populate each unsynced environment variable in Render, including the exact HTTPS `ASSEMBLY_PUBLIC_URL`. The container built and passed a local mock smoke test. Render account deployment and the managed database remain pending.
+For a hosted sandbox demo, run the Docker image as the web service and run the reconciliation worker separately with the same managed PostgreSQL database and Sandbox credentials. Set ASSEMBLY_PUBLIC_URL to the public HTTPS origin. See [SPONSORS.md](SPONSORS.md) for the five selected integrations and verification steps.
 
 ## Enable AI
 

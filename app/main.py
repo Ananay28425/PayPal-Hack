@@ -81,22 +81,15 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
         return {
             "AG Grid": "Bundle installed" if grid_bundle.is_file() else "Install npm dependencies",
             "APIMatic": "Development context used for PayPal timeout handling",
-            "Astropods": "Configured" if sponsors.settings("ASTROPODS_PLANNER_URL", "ASTROPODS_TOKEN") else "Needs planner deployment and token",
             "Bryntum": "Assets installed" if all((sponsors.SCHEDULER / name).is_file() for name in sponsors.SCHEDULER_ASSETS) else "Needs Scheduler trial assets",
             "Channel3": "Configured" if sponsors.settings("CHANNEL3_API_KEY") else "Needs API key",
-            "Elastic": "Configured" if sponsors.settings("ELASTIC_URL", "ELASTIC_API_KEY") else "Needs index and API key",
-            "Kernel": "Configured" if sponsors.settings("KERNEL_API_KEY") else "Needs API key",
             "Postman": "Checkout regression collection in repository",
-            "Render": "Running on Render" if os.getenv("RENDER") == "true" else "Deployment blueprint available",
-            "Zapier": "Configured" if payment_mode == "sandbox" and sponsors.settings("ZAPIER_SETUP_HOOK") else "Needs Sandbox and setup webhook",
         }
 
     @app.post("/api/sponsors/evidence/{name}")
     async def sponsor_evidence(name: str, x_demo_token: str | None = Header(default=None)):
         authorize(x_demo_token)
-        calls = {"channel3": (sponsors.channel3, ("CHANNEL3_API_KEY",)),
-                 "elastic": (sponsors.elastic, ("ELASTIC_URL", "ELASTIC_API_KEY")),
-                 "kernel": (sponsors.kernel, ("KERNEL_API_KEY",))}
+        calls = {"channel3": (sponsors.channel3, ("CHANNEL3_API_KEY",))}
         if name not in calls:
             raise HTTPException(404, "Unknown evidence provider")
         call, required = calls[name]
@@ -110,32 +103,6 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
         if name not in sponsors.SCHEDULER_ASSETS or not path.is_file():
             raise HTTPException(404, "Scheduler asset unavailable")
         return FileResponse(path)
-
-    @app.post("/api/sponsors/zapier/{purchase_id}")
-    async def setup_reminder(purchase_id: str, x_demo_token: str | None = Header(default=None)):
-        authorize(x_demo_token)
-        hook = os.getenv("ZAPIER_SETUP_HOOK", "")
-        if payment_mode != "sandbox" or urlparse(hook).netloc != "hooks.zapier.com":
-            raise HTTPException(503, "Configure a Zapier Catch Hook in Sandbox mode")
-        with factory.begin() as db:
-            purchase = owned(db, purchase_id)
-            if purchase.status != "CAPTURED" or not purchase.provider_capture_id:
-                raise HTTPException(409, "A verified Sandbox capture is required")
-            event = {"event": "recording_kit_setup", "purchase_id": purchase_id,
-                     "capture_id": purchase.provider_capture_id}
-            operation = PaymentOperation(id=str(uuid4()), purchase_id=purchase_id, kind="SETUP_REMINDER",
-                request_id=str(uuid4()), body_digest=digest(event), state="DISPATCHED")
-            db.add(operation)
-            try:
-                db.flush()
-            except IntegrityError:
-                raise HTTPException(409, "Reminder already attempted. Check Zapier Task History before taking further action.") from None
-        await sponsors.request("POST", hook, body=event)
-        with factory.begin() as db:
-            stored = db.get(PaymentOperation, operation.id)
-            stored.state = "ACKNOWLEDGED"
-            record(db, purchase_id, "setup_webhook_acknowledged")
-        return {"status": "Webhook received. Check Zapier Task History for the action outcome."}
 
     def authorize(token: str | None) -> None:
         if not token or not hmac.compare_digest(token, demo_token):
@@ -171,7 +138,7 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
     @app.get("/api/health")
     def health():
         return {"status": "ok", "payment_mode": payment_mode,
-                "ai_configured": bool(os.getenv("OPENAI_API_KEY")) or sponsors.settings("ASTROPODS_PLANNER_URL", "ASTROPODS_TOKEN")}
+                "ai_configured": bool(os.getenv("OPENAI_API_KEY"))}
 
     @app.get("/api/catalogue")
     def get_catalogue():
@@ -220,9 +187,8 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
     async def plan(payload: InterpretRequest, x_demo_token: str | None = Header(default=None)):
         """Let AI propose catalogue items; the deterministic checker decides readiness."""
         authorize(x_demo_token)
-        hosted = sponsors.settings("ASTROPODS_PLANNER_URL", "ASTROPODS_TOKEN")
-        if not hosted and not os.getenv("OPENAI_API_KEY"):
-            raise HTTPException(status_code=503, detail="Configure OpenAI or the Astropods planner")
+        if not os.getenv("OPENAI_API_KEY"):
+            raise HTTPException(status_code=503, detail="Configure OpenAI")
         from openai import AsyncOpenAI
 
         product_ids = [product["id"] for product in catalogue()]
@@ -241,16 +207,6 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
             "required": ["people", "budget_usd", "needs_confirmation", "selections"],
         }
         try:
-            if hosted:
-                planner_demo_token = os.getenv("ASTROPODS_PLANNER_DEMO_TOKEN")
-                hosted_result = await sponsors.payload("POST", os.environ["ASTROPODS_PLANNER_URL"],
-                    token=os.environ["ASTROPODS_TOKEN"],
-                    headers={"X-Demo-Token": planner_demo_token} if planner_demo_token else None,
-                    body={"text": payload.text})
-                configuration = Configuration.model_validate(hosted_result["proposal"])
-                return {"proposal": configuration.model_dump(), "check": evaluate(configuration),
-                        "needs_confirmation": True, "source": "astropods",
-                        "notice": "Astropods proposal. Review the requirements and kit."}
             client = AsyncOpenAI(timeout=20)
             result = await client.responses.create(
                 model=os.getenv("ASSEMBLY_AI_MODEL", "gpt-4.1-mini"),
