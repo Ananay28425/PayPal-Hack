@@ -38,8 +38,7 @@ def test_sponsor_status_and_evidence_boundaries(client, monkeypatch):
 
     monkeypatch.delenv("CHANNEL3_API_KEY", raising=False)
     status = client.get("/api/sponsors").json()
-    assert set(status) == {"AG Grid", "APIMatic", "Astropods", "Bryntum", "Channel3",
-                           "Elastic", "Kernel", "Postman", "Render", "Zapier"}
+    assert set(status) == {"AG Grid", "APIMatic", "Bryntum", "Channel3", "Postman"}
     endpoint = "/api/sponsors/evidence/channel3"
     assert client.post(endpoint).status_code == 401
     assert client.post(endpoint, headers=auth()).status_code == 503
@@ -50,7 +49,7 @@ def test_sponsor_status_and_evidence_boundaries(client, monkeypatch):
 
     monkeypatch.setattr(sponsors, "channel3", search)
     assert client.post(endpoint, headers=auth()).json()["result"][0]["id"] == "fixture-variant"
-    assert client.post("/api/sponsors/zapier/unknown", headers=auth()).status_code == 503
+    assert client.post("/api/sponsors/evidence/unknown", headers=auth()).status_code == 404
 
 
 def prepared(client: TestClient, key="business-intent-1"):

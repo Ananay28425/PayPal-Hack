@@ -4,7 +4,6 @@
 import json
 import math
 import os
-import re
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -12,9 +11,6 @@ import httpx
 from fastapi import HTTPException
 
 
-SOURCE = "https://userguides.focusrite.com/hc/en-gb/articles/19640392541202-Scarlett-2i2-4th-Gen-Specifications"
-VARIANT = "scarlett-2i2-4th-gen"
-REVISION = "manufacturer-reference-v1"
 SCHEDULER = Path(__file__).resolve().parents[1] / "node_modules/@bryntum/scheduler-trial"
 SCHEDULER_ASSETS = {"scheduler.module.js", "scheduler.css", "stockholm-light.css"}
 
@@ -397,3 +393,6 @@ async def kernel():
             )
         except HTTPException:
             pass  # The bounded browser lifetime also cleans up failed deletions.
+        raise HTTPException(502, "Channel3 returned an invalid results list")
+    return [{"id": str(row["id"])[:100], "title": str(row.get("title", ""))[:180]}
+            for row in products[:5] if isinstance(row, dict) and row.get("id")]

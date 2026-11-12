@@ -45,3 +45,27 @@ def test_independent_counterexample_expectations():
     cases = run_configuration_cases()
     assert len(cases) == 4
     assert all(case["passed"] for case in cases)
+
+
+def test_custom_kit_unknown_capacity_and_quantity_repair():
+    from app.domain import Configuration, evaluate, repair
+
+    config = Configuration.model_validate({
+        "requirements": {"people": 1, "budget_cents": 20000},
+        "selections": [],
+        "custom": {"requirement": "Workshop seats", "required_units": 12,
+                   "items": [{"product_id": "custom-bench", "name": "Bench",
+                              "quantity": 1, "unit_cents": 4000, "capacity": None}]},
+    })
+    assert evaluate(config)["checks"][0]["status"] == "unknown"
+    assert repair(config)["reason"] == "missing_capacity"
+    config.custom.items[0].capacity = 4
+    original = evaluate(config)
+    assert not original["ready"]
+    result = repair(config)
+    assert result["check"]["ready"]
+    assert result["check"]["total_cents"] == 12000
+    assert result["check"]["digest"] != original["digest"]
+    assert result["check"]["snapshot"]["lines"][0]["quantity"] == 3
+    config.requirements.budget_cents = 10000
+    assert repair(config)["proposal"] is None

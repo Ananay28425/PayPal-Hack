@@ -9,6 +9,7 @@ const state = {
   revision: 0,
   busy: false,
   repairGrid: null
+  inspection: "recording", catalogue: [], check: null, purchase: null, mode: null, revision: 0, busy: false, repairGrid: null
 };
 let counterexampleGridApi = null;
 let gridLibrary;
@@ -19,14 +20,9 @@ const money = cents => `$${(cents / 100).toFixed(2)}`;
 const sponsorRoles = {
   "AG Grid": "Compare repairs and their blockers",
   APIMatic: "Ground the PayPal timeout contract",
-  Astropods: "Propose a kit through the hosted planner",
   Bryntum: "Visualize delivery and recording dates",
   Channel3: "Discover reference product variants",
-  Elastic: "Retrieve reviewed variant evidence",
-  Kernel: "Inspect the manufacturer specification",
   Postman: "Exercise checkout and replay",
-  Render: "Host the checkout API and reconciliation worker",
-  Zapier: "Trigger an opted-in setup workflow after capture"
 };
 api("/api/sponsors").then(status => {
   for (const [name, role] of Object.entries(sponsorRoles)) {
@@ -100,24 +96,6 @@ $("show-schedule").addEventListener("click", async event => {
   }
 });
 
-$("setup-reminder").addEventListener("click", async event => {
-  const button = event.currentTarget;
-  const output = $("reminder-result");
-  if (state.mode !== "sandbox" || state.purchase?.status !== "CAPTURED") {
-    output.textContent = "Complete a verified Sandbox purchase first.";
-    return;
-  }
-  button.disabled = true;
-  try {
-    const result = await api(`/api/sponsors/zapier/${state.purchase.id}`, "POST");
-    output.textContent = result.status;
-  } catch (error) {
-    output.textContent = error.message;
-  } finally {
-    button.disabled = false;
-  }
-});
-
 function toast(message, error = false) {
   const el = $("toast");
   el.textContent = message;
@@ -139,18 +117,102 @@ async function api(path, method = "GET", body = undefined) {
   return data;
 }
 
+function selectInspection(mode) {
+  state.inspection = mode;
+  const custom = mode === "custom";
+  document.querySelector(`input[name="inspection"][value="${mode}"]`).checked = true;
+  $("recording-goal").hidden = custom;
+  $("recording-inspection").hidden = custom;
+  $("custom-inspection").hidden = !custom;
+  invalidateCheck();
+}
+
+function addCustomItem(item = {}) {
+  const root = $("custom-items");
+  if (root.children.length >= 20) return;
+  const row = document.createElement("fieldset");
+  row.className = "custom-item";
+  row.dataset.productId = item.product_id ?? `custom-${crypto.randomUUID()}`;
+  const fields = [
+    ["name", "Item name", "text", item.name ?? "", {maxLength: 100}],
+    ["quantity", "Quantity", "number", item.quantity ?? 1, {min: 1, max: 16, step: 1}],
+    ["price", "Unit price (USD)", "number", item.unit_cents == null ? "" : item.unit_cents / 100, {min: 0.01, max: 20000, step: 0.01}],
+    ["capacity", "Units provided per item", "number", item.capacity ?? "", {min: 0, max: 1000, step: 1}],
+  ];
+  for (const [key, title, type, value, limits] of fields) {
+    const label = document.createElement("label");
+    label.textContent = title;
+    const input = document.createElement("input");
+    Object.assign(input, {type, value, ...limits});
+    input.dataset.field = key;
+    input.addEventListener("input", invalidateCheck);
+    label.append(input);
+    row.append(label);
+  }
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.className = "preset-button";
+  remove.textContent = "Remove item";
+  remove.addEventListener("click", () => { row.remove(); invalidateCheck(); });
+  row.append(remove);
+  root.append(row);
+}
+
+for (const option of document.querySelectorAll('input[name="inspection"]')) {
+  option.addEventListener("change", () => selectInspection(option.value));
+}
+$("add-custom-item").addEventListener("click", () => { addCustomItem(); invalidateCheck(); });
+for (const id of ["custom-requirement", "custom-required-units"]) {
+  $(id).addEventListener("input", invalidateCheck);
+}
+
 function currentConfig() {
+  const budget = $("budget");
+  if (!budget.value || !budget.checkValidity()) throw new Error("Enter a valid USD budget.");
+  const budgetCents = Math.round(Number(budget.value) * 100);
+  if (state.inspection === "custom") {
+    const requirement = $("custom-requirement").value.trim();
+    const units = $("custom-required-units");
+    if (!requirement || !units.value || !units.checkValidity()) {
+      throw new Error("Enter a requirement name and a valid number of required units.");
+    }
+    const items = Array.from($("custom-items").children, row => {
+      const field = key => row.querySelector(`[data-field="${key}"]`);
+      const name = field("name").value.trim();
+      const quantity = field("quantity"), price = field("price"), capacity = field("capacity");
+      if (!name || !quantity.value || !price.value || !quantity.checkValidity() ||
+          !price.checkValidity() || !capacity.checkValidity()) {
+        throw new Error("Enter a name, valid quantity, and positive USD price for every item.");
+      }
+      return {product_id: row.dataset.productId, name, quantity: Number(quantity.value),
+        unit_cents: Math.round(Number(price.value) * 100),
+        capacity: capacity.value === "" ? null : Number(capacity.value)};
+    });
+    if (!items.length) throw new Error("Add at least one item.");
+    return {requirements: {people: 1, budget_cents: budgetCents, currency: "USD"},
+      selections: [], custom: {requirement, required_units: Number(units.value), items}};
+  }
   const selections = state.catalogue.map(product => ({
     product_id: product.id,
     quantity: Number($("qty-" + product.id).value)
   })).filter(item => item.quantity > 0);
   return {
-    requirements: { people: Number($("people").value), budget_cents: Math.round(Number($("budget").value) * 100), currency: "USD" },
+    requirements: { people: Number($("people").value), budget_cents: budgetCents, currency: "USD" },
     selections
   };
 }
 
 function setConfig(config) {
+  if (config.custom) {
+    $("budget").value = config.requirements.budget_cents / 100;
+    $("custom-requirement").value = config.custom.requirement;
+    $("custom-required-units").value = config.custom.required_units;
+    $("custom-items").replaceChildren();
+    config.custom.items.forEach(addCustomItem);
+    selectInspection("custom");
+    return;
+  }
+  selectInspection("recording");
   $("people").value = config.requirements.people;
   $("budget").value = config.requirements.budget_cents / 100;
   for (const product of state.catalogue) $("qty-" + product.id).value = 0;
@@ -436,7 +498,7 @@ function comparisonPanel(alternatives) {
     state.repairGrid = library.createGrid(grid, {
       rowData: rows,
       columnDefs: [
-        { field: "layout", headerName: "Interface and monitoring", minWidth: 165, flex: 2, wrapText: true, autoHeight: true },
+        { field: "layout", headerName: "Option", minWidth: 165, flex: 2, wrapText: true, autoHeight: true },
         { field: "total_cents", headerName: "Total", width: 105, filter: "agNumberColumnFilter", valueFormatter: ({value}) => money(value) },
         { field: "decision", headerName: "Result", width: 115, filter: "agTextColumnFilter" },
       ],
@@ -456,7 +518,9 @@ function renderRepair(repair) {
   const root = $("repair-result");
   const heading = document.createElement("h3");
   if (!repair.proposal) {
-    heading.textContent = "No compatible kit found within this budget";
+    heading.textContent = repair.reason === "missing_capacity"
+      ? "Enter missing item capacities to find a repair"
+      : "No compatible adjustment found within this budget";
     root.append(heading);
     if (repair.alternatives?.length) root.append(comparisonPanel(repair.alternatives));
     return;
@@ -679,8 +743,10 @@ $("counterexamples").addEventListener("click", () => action(async () => {
     state.mode = health.payment_mode; state.catalogue = catalogue.products;
     $("mode").textContent = health.payment_mode === "mock" ? "MOCK CHECKOUT" : "PAYPAL SANDBOX";
     $("interpret").disabled = !health.ai_configured;
-    if (!health.ai_configured) $("ai-state").textContent = "Configure OpenAI or Astropods to use AI planning. Manual examples remain available.";
+    if (!health.ai_configured) $("ai-state").textContent = "Configure OpenAI to use AI planning. Manual examples remain available.";
     renderCatalogue(); setConfig(examples.broken);
+    addCustomItem();
+    $("inspection-options").disabled = false;
     $("broken").disabled = false;
     $("broken").addEventListener("click", () => action(async () => {
       setConfig(examples.broken);
