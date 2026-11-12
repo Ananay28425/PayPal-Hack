@@ -277,6 +277,7 @@ def test_ai_proposal_never_creates_or_approves_purchase(client, monkeypatch):
     from types import SimpleNamespace
     import openai
     monkeypatch.setenv("OPENAI_API_KEY", "test-only-key")
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
 
     class FakeResponses:
         async def create(self, **kwargs):
@@ -287,6 +288,12 @@ def test_ai_proposal_never_creates_or_approves_purchase(client, monkeypatch):
         def __init__(self, **kwargs):
             self.responses = FakeResponses()
 
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *exc_info):
+            pass
+
     monkeypatch.setattr(openai, "AsyncOpenAI", FakeClient)
     result = client.post("/api/interpret", headers=auth(), json={
         "text": "Four-person recording kit under one thousand US dollars"})
@@ -296,16 +303,26 @@ def test_ai_proposal_never_creates_or_approves_purchase(client, monkeypatch):
     assert client.get("/api/purchases", headers=auth()).json() == []
 
 
-def test_ai_catalogue_plan_is_checked_without_creating_purchase(client, monkeypatch):
+@pytest.mark.parametrize("use_router", [False, True])
+def test_ai_catalogue_plan_is_checked_without_creating_purchase(client, monkeypatch, use_router):
     from types import SimpleNamespace
     import json
     import openai
 
     monkeypatch.setenv("OPENAI_API_KEY", "test-only-key")
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    if use_router:
+        monkeypatch.setenv("OPENROUTER_API_KEY", "test-only-router-key")
+        monkeypatch.setenv("ASSEMBLY_OPENROUTER_MODEL", "baidu/ernie-5.5-flash-preview:free")
+    else:
+        monkeypatch.setenv("ASSEMBLY_AI_MODEL", "gpt-4.1-mini")
 
     class FakeResponses:
         async def create(self, **kwargs):
             assert "Never infer authorization" in kwargs["instructions"]
+            assert kwargs["model"] == ("baidu/ernie-5.5-flash-preview:free" if use_router else "gpt-4.1-mini")
+            if use_router:
+                assert kwargs["extra_body"] == {"provider": {"require_parameters": True}}
             assert kwargs["text"]["format"]["strict"] is True
             return SimpleNamespace(output_text=json.dumps({
                 "people": 4, "budget_usd": 1000, "needs_confirmation": False,
@@ -314,7 +331,16 @@ def test_ai_catalogue_plan_is_checked_without_creating_purchase(client, monkeypa
 
     class FakeClient:
         def __init__(self, **kwargs):
+            if use_router:
+                assert kwargs["base_url"] == "https://openrouter.ai/api/v1"
+                assert kwargs["api_key"] == "test-only-router-key"
             self.responses = FakeResponses()
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *exc_info):
+            pass
 
     monkeypatch.setattr(openai, "AsyncOpenAI", FakeClient)
     response = client.post("/api/plan", headers=auth(), json={
@@ -330,6 +356,7 @@ def test_ai_catalogue_plan_rejects_unknown_product(client, monkeypatch):
     import openai
 
     monkeypatch.setenv("OPENAI_API_KEY", "test-only-key")
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
 
     class FakeResponses:
         async def create(self, **kwargs):
@@ -341,6 +368,12 @@ def test_ai_catalogue_plan_rejects_unknown_product(client, monkeypatch):
     class FakeClient:
         def __init__(self, **kwargs):
             self.responses = FakeResponses()
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *exc_info):
+            pass
 
     monkeypatch.setattr(openai, "AsyncOpenAI", FakeClient)
     response = client.post("/api/plan", headers=auth(), json={

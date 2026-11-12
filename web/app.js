@@ -1,15 +1,14 @@
 "use strict";
 
 const state = {
+  inspection: "recording",
   catalogue: [],
-  configuration: null,
   check: null,
   purchase: null,
   mode: null,
   revision: 0,
   busy: false,
   repairGrid: null
-  inspection: "recording", catalogue: [], check: null, purchase: null, mode: null, revision: 0, busy: false, repairGrid: null
 };
 let counterexampleGridApi = null;
 let gridLibrary;
@@ -551,7 +550,12 @@ function renderRepair(repair) {
 function renderPurchase() {
   const root = $("purchase"); root.replaceChildren();
   const purchase = state.purchase;
-  if (!purchase) { root.textContent = "A compatible kit can be prepared for checkout."; return; }
+  if (!purchase) {
+    root.textContent = state.check?.ready
+      ? "Kit passed. Select Prepare purchase to review the exact terms."
+      : "Run a configuration check and resolve any blockers to enable Prepare purchase.";
+    return;
+  }
   const facts = document.createElement("div"); facts.className = "facts";
   for (const [label, value] of [["STATE", purchase.status], ["EXACT TOTAL", `${money(purchase.total_cents)} ${purchase.currency}`], ["OFFER EXPIRES", new Date(purchase.expires_at).toLocaleTimeString()]]) {
     const box = document.createElement("div"); box.className = "fact";
@@ -579,7 +583,9 @@ function renderPurchase() {
   digest.textContent = `Merchant: ${purchase.snapshot.merchant_id} · ${version ? "Rules: " + version + " · " : ""}Frozen terms SHA-256: ${purchase.digest}`;
   root.append(digest);
   const frozen = document.createElement("p"); frozen.className = "hint";
-  frozen.textContent = "This purchase remains frozen if you edit the kit above. Start a new purchase for changed terms.";
+  frozen.textContent = purchase.status === "CAPTURED"
+    ? "Purchase complete. Select Start new purchase to check another kit."
+    : "These purchase terms are fixed. Start a new purchase to change them.";
   root.append(frozen);
   if (purchase.approval_url && purchase.status === "AWAITING_BUYER" && state.mode === "sandbox") {
     const link = document.createElement("a"); link.href = purchase.approval_url; link.textContent = "Open PayPal Sandbox approval";
@@ -629,10 +635,21 @@ $("restart").addEventListener("click", () => {
   history.replaceState(null, "", "/");
   $("audit").replaceChildren();
   invalidateCheck();
+  $("workspace").scrollIntoView();
 });
 $("interpret").addEventListener("click", () => action(async () => {
   const revision = state.revision;
-  const data = await api("/api/plan", "POST", { text: $("prompt").value });
+  $("interpret").disabled = true;
+  $("ai-state").textContent = "Requesting an AI proposal…";
+  let data;
+  try {
+    data = await api("/api/plan", "POST", { text: $("prompt").value });
+  } catch (error) {
+    $("ai-state").textContent = error.message;
+    throw error;
+  } finally {
+    $("interpret").disabled = false;
+  }
   if (revision !== state.revision) return;
   setConfig(data.proposal);
   state.check = data.check;
@@ -699,11 +716,10 @@ $("counterexamples").addEventListener("click", () => action(async () => {
   description.textContent = `${total} scenarios · ${failed} failed · Configuration + Payment Integrity`;
   summaryRoot.append(badge, description);
 
-  // AG Grid 32's UMD build may expose the community module registry.
-  // Register once when available; otherwise the bundled legacy API can run directly.
-  if (agGrid.ModuleRegistry && agGrid.AllCommunityModule && !window.__assemblyAgGridRegistered) {
-    agGrid.ModuleRegistry.registerModules([agGrid.AllCommunityModule]);
-    window.__assemblyAgGridRegistered = true;
+  const grid = await loadGrid();
+  if (!grid) {
+    gridRoot.textContent = "Install the project’s npm dependencies to inspect each case.";
+    return;
   }
 
   const columnDefs = [
@@ -723,7 +739,7 @@ $("counterexamples").addEventListener("click", () => action(async () => {
     { headerName: "RATIONALE", field: "rationale", minWidth: 260, flex: 2, filter: "agTextColumnFilter", wrapText: true, autoHeight: true }
   ];
 
-  counterexampleGridApi = agGrid.createGrid(gridRoot, {
+  counterexampleGridApi = grid.createGrid(gridRoot, {
     columnDefs,
     rowData: cases,
     defaultColDef: { sortable: true, resizable: true, filter: true, floatingFilter: true },
@@ -743,7 +759,7 @@ $("counterexamples").addEventListener("click", () => action(async () => {
     state.mode = health.payment_mode; state.catalogue = catalogue.products;
     $("mode").textContent = health.payment_mode === "mock" ? "MOCK CHECKOUT" : "PAYPAL SANDBOX";
     $("interpret").disabled = !health.ai_configured;
-    if (!health.ai_configured) $("ai-state").textContent = "Configure OpenAI to use AI planning. Manual examples remain available.";
+    if (!health.ai_configured) $("ai-state").textContent = "Configure OpenRouter or OpenAI to use AI planning. Manual examples remain available.";
     renderCatalogue(); setConfig(examples.broken);
     addCustomItem();
     $("inspection-options").disabled = false;

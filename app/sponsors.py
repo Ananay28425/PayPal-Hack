@@ -246,7 +246,7 @@ async def channel3_search(query: str, limit: int = 8):
 
     # Raw HTTP API response uses "products".
     # The SDK's .data/.items wrapper is not used here.
-    products = data.get("products")
+    products = data.get("products", data.get("data"))
 
     if not isinstance(products, list):
         raise HTTPException(

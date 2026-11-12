@@ -13,27 +13,20 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements-dev.txt
 npm ci --ignore-scripts
-$env:ASSEMBLY_DEMO_TOKEN='choose-a-long-random-token'
-$env:ASSEMBLY_PAYMENT_MODE='mock'
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+notepad .env
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8010
 ```
 
-Open `http://127.0.0.1:8000`. Choose **Check flawed example**, then **Find compatible repair**. The $610 cart fails microphone and listening capacity. Open **Compare checked alternatives** and select a row to see why it passes or fails. Choose **Apply and recheck kit** to review the $810 repair. The npm step installs the AG Grid comparison. Without it, the same alternatives remain inspectable as buttons.
+Set a unique `ASSEMBLY_DEMO_TOKEN` in `.env`, then open `http://127.0.0.1:8010`. Choose **Check flawed example**, then **Find compatible repair**. The $610 cart fails microphone and listening capacity. Open **Compare checked alternatives** and select a row to see why it passes or fails. Choose **Apply and recheck kit** to review the $810 repair. The npm step installs the AG Grid comparison. Without it, the same alternatives remain inspectable as buttons.
 
 Enter the demo token, prepare the purchase, review the frozen items and total, approve exact terms, approve as mock buyer, and capture. The audit trail records each transition. Select **Start new purchase** to clear the active review.
 
-Linux/macOS: activate `.venv/bin/activate`, use `export` for environment variables, and run the same Uvicorn command.
+Linux/macOS: activate `.venv/bin/activate`, use `cp .env.example .env`, and run the same Uvicorn command. Both the web app and reconciliation worker load the project root `.env` at startup. Existing environment variables take precedence. Start a fresh terminal if it still has settings from a previous launch. The ignored `.env` stays on the server.
 
 ## Use PayPal Sandbox
 
-Create a sandbox REST app and a sandbox buyer account in the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/). Set `ASSEMBLY_PAYMENT_MODE=sandbox`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, and `ASSEMBLY_PUBLIC_URL` to the actual public HTTPS origin. Restart the server. The UI provides the PayPal approval URL after internal approval. Return to the application and select **Capture and verify**. A browser return alone is never treated as a captured payment.
-
-```powershell
-$env:ASSEMBLY_PAYMENT_MODE='sandbox'
-$env:PAYPAL_CLIENT_ID='your-sandbox-client-id'
-$env:PAYPAL_CLIENT_SECRET='your-sandbox-secret'
-$env:ASSEMBLY_PUBLIC_URL='https://your-public-demo.example'
-```
+Create a sandbox REST app and a personal Sandbox buyer in the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/). In `.env`, set `ASSEMBLY_PAYMENT_MODE=sandbox`, `PAYPAL_CLIENT_ID`, and `PAYPAL_CLIENT_SECRET`. Set `ASSEMBLY_PUBLIC_URL` to the origin where the browser runs the app, such as `http://127.0.0.1:8010` locally or your HTTPS URL for a hosted demo. Restart the server. After approving the exact terms in the app, open the PayPal approval link and sign in as the Sandbox buyer. On return, select **Capture and verify**.
 
 The sandbox adapter has **not** yet been exercised with this team's credentials. Its create, read, and capture calls follow the [Orders v2 API](https://developer.paypal.com/api/orders/v2) and [idempotency guidance](https://developer.paypal.com/api/rest/reference/idempotency). Test it with owned sandbox accounts before any public demo. If a provider response is ambiguous, the original operation remains unresolved; reconciliation reads the original order. The app never creates a replacement capture automatically.
 
@@ -41,7 +34,7 @@ For a hosted sandbox demo, run the Docker image as the web service and run the r
 
 ## Enable AI
 
-Set `OPENAI_API_KEY` on the server and restart it. **Ask AI to propose a kit** calls `/api/plan`: a bounded planner extracts people and budget, selects items only from the invented merchant catalogue, and returns a proposed configuration. The server validates the product IDs and quantities, then runs the deterministic checker before showing the result. The buyer can review and edit every field and item. AI cannot authorize spending, certify compatibility, create or capture an order, or declare payment success. The existing `/api/interpret` endpoint remains available for requirements-only clients. Without a key, the AI button is disabled and the manual presets and payment simulation remain usable; that mode does not demonstrate an AI call.
+Set `OPENROUTER_API_KEY` in `.env` and restart the server. The example pins the free ERNIE model. OpenRouter takes precedence when configured. To use direct OpenAI, leave the OpenRouter key empty and set `OPENAI_API_KEY`. Set `CHANNEL3_API_KEY` in the same file to enable live product discovery. **Ask AI to propose a kit** calls `/api/plan`: a bounded planner extracts people and budget, selects items only from the invented merchant catalogue, and returns a proposed configuration. The server validates the product IDs and quantities, then runs the deterministic checker before showing the result. The buyer can review and edit every field and item. AI cannot authorize spending, certify compatibility, create or capture an order, or declare payment success. The existing `/api/interpret` endpoint remains available for requirements-only clients. Without a key, the AI button is disabled and the manual presets and payment simulation remain usable; that mode does not demonstrate an AI call.
 
 ## Tests
 
@@ -69,4 +62,4 @@ Security limits: the shared demo token is not user authentication, tenant isolat
 
 ## Sponsor status
 
-See [the ten-sponsor implementation ledger](SPONSORS.md) for which tools ran, the pending integrations, and the evidence each must produce. See [the submission decision](research/submission-decision-2026-11-06.md) for the project comparison, judging evidence, merchant pilot, and production rollout gates.
+See [the sponsor implementation ledger](SPONSORS.md) for which tools ran, the pending integrations, and the evidence each must produce. See [the submission decision](research/submission-decision-2026-11-06.md) for the project comparison, judging evidence, merchant pilot, and production rollout gates.
