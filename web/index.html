@@ -73,6 +73,8 @@
           <div class="catalogue-heading"><span>CATALOGUE ITEM</span><span>QTY</span></div>
           <div id="catalogue" class="catalogue"></div>
           <button id="check" type="button" class="primary">RUN CONFIGURATION CHECK <span aria-hidden="true">↗</span></button>
+          <button id="repair" type="button" class="preset-button" disabled>FIND A COMPATIBLE REPAIR</button>
+          <div id="repair-result"></div>
         </section>
       </div>
     </section>
@@ -87,7 +89,9 @@
       <div class="section-rail"><span>[04] CONTROLLED PAYMENT</span><span>EXACT TERMS / BUYER APPROVAL / PROVIDER VERIFICATION</span><span>PAYPAL</span></div>
       <div class="payment-heading"><div><p class="eyebrow">MONEY MOVES ONLY AFTER APPROVAL</p><h2 id="payment-title">THE CART CAN CHANGE.<br><em>APPROVAL CANNOT.</em></h2></div><p>Prepare a purchase from a passing kit. The price, currency, merchant, and items are frozen into one record. A changed kit requires a new approval.</p></div>
       <div class="authority-note"><span>!</span><p>AI can propose a kit. It cannot authorize spending, claim a payment succeeded, or retry an uncertain capture as a new charge.</p></div>
-      <div class="panel checkout"><div class="panel-head"><span class="panel-number">PURCHASE INTEGRITY RECORD</span><span class="panel-state">USER CONTROLLED</span></div><div id="purchase" class="empty">A compatible kit can be prepared for checkout.</div><div class="actions"><button id="restart" type="button" class="subtle">START NEW PURCHASE</button><button id="prepare" type="button" disabled>PREPARE PURCHASE</button><button id="approve" type="button" disabled>APPROVE EXACT TERMS</button><button id="buyer" type="button" disabled>APPROVE AS MOCK BUYER</button><button id="capture" type="button" disabled>CAPTURE AND VERIFY</button><button id="reconcile" type="button" disabled>RECONCILE OUTCOME</button></div><div id="audit" class="audit" aria-live="polite"></div></div>
+      <div class="panel checkout"><div class="panel-head"><span class="panel-number">PURCHASE INTEGRITY RECORD</span><span class="panel-state">USER CONTROLLED</span></div><div id="purchase" class="empty">A compatible kit can be prepared for checkout.</div>
+        <p id="review-terms" class="hint" hidden>The configuration passed. Review the frozen purchase terms before preparing checkout.</p>
+        <div class="actions"><button id="restart" type="button" class="subtle">START NEW PURCHASE</button><button id="prepare" type="button" disabled>PREPARE PURCHASE</button><button id="approve" type="button" disabled>APPROVE EXACT TERMS</button><button id="buyer" type="button" disabled>APPROVE AS MOCK BUYER</button><button id="capture" type="button" disabled>CAPTURE AND VERIFY</button><button id="reconcile" type="button" disabled>RECONCILE OUTCOME</button></div><div id="audit" class="audit" aria-live="polite"></div></div>
     </section>
 
     <section class="lab-shell" id="tests" aria-labelledby="lab-title">
@@ -105,6 +109,31 @@
           <p class="hint">Deterministic configuration and payment-integrity fixtures. Passing these scenarios is not a production safety guarantee.</p>
         </div>
       </div>
+    </section>
+
+
+    <section class="sponsor-panel panel" id="sponsors" aria-labelledby="sponsors-title">
+      <div class="panel-head"><span class="panel-number">[06] HACKATHON SPONSORS</span><span class="panel-state">INTEGRATION STATUS</span></div>
+      <h2 id="sponsors-title">SPONSOR TOOLING</h2>
+      <p class="panel-copy">Connected tools support planning, evidence, testing, deployment, scheduling and post-purchase workflows. Availability depends on configured credentials and assets.</p>
+      <ul id="sponsor-status" aria-live="polite"><li>Loading sponsor integration status…</li></ul>
+      <div class="sponsor-actions">
+        <button type="button" data-evidence="channel3">CHECK CHANNEL3 EVIDENCE</button>
+        <button type="button" data-evidence="elastic">CHECK ELASTIC EVIDENCE</button>
+        <button type="button" data-evidence="kernel">CHECK KERNEL EVIDENCE</button>
+      </div>
+      <pre id="sponsor-result" aria-live="polite"></pre>
+      <h3>Recording setup schedule</h3>
+      <div class="inline">
+        <div><label for="arrival-day">Expected delivery date</label><input id="arrival-day" type="date"></div>
+        <div><label for="setup-day">First recording date</label><input id="setup-day" type="date"></div>
+      </div>
+      <button id="show-schedule" type="button" class="preset-button">SHOW SETUP SCHEDULE</button>
+      <p id="schedule-status" class="hint" aria-live="polite"></p>
+      <div id="setup-schedule"></div>
+      <h3>Post-purchase setup reminder</h3>
+      <button id="setup-reminder" type="button" class="preset-button">SEND OPTED-IN SETUP REMINDER</button>
+      <p id="reminder-result" class="hint" aria-live="polite"></p>
     </section>
 
     <footer class="footer"><div class="footer-main"><span>ASSEMBLY<span>PROOF</span></span><p>PLAN WITH AI.<br>PAY WITH PROOF.</p><a href="#workspace">BACK TO THE DEMO <span aria-hidden="true">↗</span></a></div><div class="footer-bottom"><span>INVENTED CATALOGUE · MOCK CHECKOUT IS A SIMULATION · PAYPAL SANDBOX NEEDS TEST CREDENTIALS</span><span>BUILT FOR A BOUNDED AGENTIC COMMERCE DEMO</span></div></footer>

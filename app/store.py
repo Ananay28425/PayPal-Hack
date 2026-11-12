@@ -6,7 +6,7 @@ semantics must be verified on the chosen managed service before real use.
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from sqlalchemy import DateTime, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, create_engine
+from sqlalchemy import DateTime, ForeignKey, Integer, JSON, String, Text, UniqueConstraint, create_engine, event
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
 
 
@@ -64,8 +64,14 @@ class AuditEvent(Base):
 
 
 def make_session_factory(url: str):
-    args = {"check_same_thread": False} if url.startswith("sqlite") else {}
+    sqlite = url.startswith("sqlite")
+    args = {"check_same_thread": False} if sqlite else {}
     engine = create_engine(url, connect_args=args, pool_pre_ping=True)
+    if sqlite:
+        @event.listens_for(engine, "connect")
+        def enable_foreign_keys(connection, _):
+            connection.execute("PRAGMA foreign_keys = ON")
+
     Base.metadata.create_all(engine)
     return sessionmaker(engine, expire_on_commit=False)
 

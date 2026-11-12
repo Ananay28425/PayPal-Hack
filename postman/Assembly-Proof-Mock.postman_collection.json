@@ -10,6 +10,9 @@
     {"key": "intentKey", "value": ""},
     {"key": "purchaseId", "value": ""},
     {"key": "digest", "value": ""},
+    {"key": "flawedConfig", "value": ""},
+    {"key": "flawedDigest", "value": ""},
+    {"key": "repairedConfig", "value": ""},
     {"key": "captureId", "value": ""}
   ],
   "auth": {"type": "noauth"},
@@ -21,7 +24,9 @@
       "name": "Health and mock mode",
       "request": {"method": "GET", "url": "{{baseUrl}}/api/health"},
       "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
-        "pm.test('mock mode explicitly selected', () => pm.expect(pm.response.json().payment_mode).to.eql('mock'));"
+        "const isMock = pm.response.code === 200 && pm.response.json().payment_mode === 'mock';",
+        "if (!isMock) pm.execution.setNextRequest(null);",
+        "pm.test('mock mode explicitly selected', () => pm.expect(isMock).to.eql(true));"
       ]}}]
     },
     {
@@ -30,22 +35,45 @@
         "body": {"mode": "raw", "raw": "{\"requirements\":{\"people\":4,\"budget_cents\":100000,\"currency\":\"USD\"},\"selections\":[{\"product_id\":\"mic-xlr\",\"quantity\":4},{\"product_id\":\"interface-2\",\"quantity\":1},{\"product_id\":\"headphones\",\"quantity\":4}]}"},
         "url": "{{baseUrl}}/api/check"},
       "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
-        "pm.test('capacity failure detected', () => { const v = pm.response.json(); pm.expect(v.ready).to.eql(false); pm.expect(v.checks.some(x => x.code === 'input_capacity' && x.status === 'fail')).to.eql(true); });"
+        "const v = pm.response.json();",
+        "pm.test('capacity failure detected', () => { pm.expect(v.ready).to.eql(false); pm.expect(v.checks.some(x => x.code === 'input_capacity' && x.status === 'fail')).to.eql(true); });",
+        "pm.collectionVariables.set('flawedConfig', pm.request.body.raw);",
+        "pm.collectionVariables.set('flawedDigest', v.digest);"
+      ]}}]
+    },
+    {
+      "name": "Compute repair from failed kit",
+      "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {"mode": "raw", "raw": "{{flawedConfig}}"},
+        "url": "{{baseUrl}}/api/repair"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "const v = pm.response.json();",
+        "pm.test('repair fits unchanged requirements and explains the $200 difference', () => { pm.expect(v.proposal.requirements).to.eql(JSON.parse(pm.collectionVariables.get('flawedConfig')).requirements); pm.expect(v.check.ready).to.eql(true); pm.expect(v.price_delta_cents).to.eql(20000); });",
+        "pm.collectionVariables.set('repairedConfig', JSON.stringify(v.proposal));"
       ]}}]
     },
     {
       "name": "Repaired kit is ready",
       "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}],
-        "body": {"mode": "raw", "raw": "{\"requirements\":{\"people\":4,\"budget_cents\":100000,\"currency\":\"USD\"},\"selections\":[{\"product_id\":\"mic-xlr\",\"quantity\":4},{\"product_id\":\"interface-8\",\"quantity\":1},{\"product_id\":\"headphones\",\"quantity\":4},{\"product_id\":\"amp-4\",\"quantity\":1}]}"},
+        "body": {"mode": "raw", "raw": "{{repairedConfig}}"},
         "url": "{{baseUrl}}/api/check"},
       "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
         "pm.test('ready and exact demo total', () => { const v = pm.response.json(); pm.expect(v.ready).to.eql(true); pm.expect(v.total_cents).to.eql(81000); pm.collectionVariables.set('digest', v.digest); });"
       ]}}]
     },
     {
+      "name": "Stale proof cannot create an offer",
+      "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-Demo-Token", "value": "{{demoToken}}"}],
+        "body": {"mode": "raw", "raw": "{\"intent_key\":\"{{intentKey}}\",\"configuration\":{{repairedConfig}},\"expected_digest\":\"{{flawedDigest}}\"}"},
+        "url": "{{baseUrl}}/api/purchases"},
+      "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
+        "pm.test('new kit requires the new proof', () => pm.response.to.have.status(409));"
+      ]}}]
+    },
+    {
       "name": "Prepare frozen purchase",
       "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}, {"key": "X-Demo-Token", "value": "{{demoToken}}"}],
-        "body": {"mode": "raw", "raw": "{\"intent_key\":\"{{intentKey}}\",\"configuration\":{\"requirements\":{\"people\":4,\"budget_cents\":100000,\"currency\":\"USD\"},\"selections\":[{\"product_id\":\"mic-xlr\",\"quantity\":4},{\"product_id\":\"interface-8\",\"quantity\":1},{\"product_id\":\"headphones\",\"quantity\":4},{\"product_id\":\"amp-4\",\"quantity\":1}]}}"},
+        "body": {"mode": "raw", "raw": "{\"intent_key\":\"{{intentKey}}\",\"configuration\":{{repairedConfig}},\"expected_digest\":\"{{digest}}\"}"},
         "url": "{{baseUrl}}/api/purchases"},
       "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": [
         "pm.test('purchase binds checked digest', () => { const v = pm.response.json(); pm.expect(v.status).to.eql('DRAFT'); pm.expect(v.digest).to.eql(pm.collectionVariables.get('digest')); pm.collectionVariables.set('purchaseId', v.id); });"

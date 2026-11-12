@@ -10,23 +10,24 @@ import hmac
 import json
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 from uuid import uuid4
 
 from fastapi import FastAPI, Header, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.domain import (BROKEN_EXAMPLE, REPAIRED_EXAMPLE, Configuration,
-                        Requirements, catalogue, digest, evaluate)
+                        Requirements, catalogue, digest, evaluate, repair)
 from app.paypal import (MockPayPal, ProviderRejected, ProviderUncertain,
                         SandboxPayPal, verified_capture, verified_order_amount)
 from app.store import PaymentOperation, Purchase, make_session_factory, record, utcnow
 from app.counterexamples import run_configuration_cases
 from app.counterexample_runner import run_all_counterexamples
-
+from app import sponsors
 
 def aware(value: datetime) -> datetime:
     # SQLite removes timezone metadata; all stored timestamps originate in UTC.
@@ -36,6 +37,7 @@ def aware(value: datetime) -> datetime:
 class PurchaseRequest(BaseModel):
     configuration: Configuration
     intent_key: str = Field(min_length=8, max_length=100, pattern=r"^[A-Za-z0-9_-]+$")
+    expected_digest: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
 
 
 class ApproveRequest(BaseModel):
@@ -74,6 +76,67 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
     app.state.provider = provider
     app.state.payment_mode = payment_mode
 
+    @app.get("/api/sponsors")
+    def sponsor_status():
+        return {
+            "AG Grid": "Bundle installed" if grid_bundle.is_file() else "Install npm dependencies",
+            "APIMatic": "Development context used for PayPal timeout handling",
+            "Astropods": "Configured" if sponsors.settings("ASTROPODS_PLANNER_URL", "ASTROPODS_TOKEN") else "Needs planner deployment and token",
+            "Bryntum": "Assets installed" if all((sponsors.SCHEDULER / name).is_file() for name in sponsors.SCHEDULER_ASSETS) else "Needs Scheduler trial assets",
+            "Channel3": "Configured" if sponsors.settings("CHANNEL3_API_KEY") else "Needs API key",
+            "Elastic": "Configured" if sponsors.settings("ELASTIC_URL", "ELASTIC_API_KEY") else "Needs index and API key",
+            "Kernel": "Configured" if sponsors.settings("KERNEL_API_KEY") else "Needs API key",
+            "Postman": "Checkout regression collection in repository",
+            "Render": "Running on Render" if os.getenv("RENDER") == "true" else "Deployment blueprint available",
+            "Zapier": "Configured" if payment_mode == "sandbox" and sponsors.settings("ZAPIER_SETUP_HOOK") else "Needs Sandbox and setup webhook",
+        }
+
+    @app.post("/api/sponsors/evidence/{name}")
+    async def sponsor_evidence(name: str, x_demo_token: str | None = Header(default=None)):
+        authorize(x_demo_token)
+        calls = {"channel3": (sponsors.channel3, ("CHANNEL3_API_KEY",)),
+                 "elastic": (sponsors.elastic, ("ELASTIC_URL", "ELASTIC_API_KEY")),
+                 "kernel": (sponsors.kernel, ("KERNEL_API_KEY",))}
+        if name not in calls:
+            raise HTTPException(404, "Unknown evidence provider")
+        call, required = calls[name]
+        if not sponsors.settings(*required):
+            raise HTTPException(503, f"Configure {', '.join(required)} first")
+        return {"result": await call()}
+
+    @app.get("/vendor/bryntum/{name}", include_in_schema=False)
+    def scheduler_asset(name: str):
+        path = sponsors.SCHEDULER / name
+        if name not in sponsors.SCHEDULER_ASSETS or not path.is_file():
+            raise HTTPException(404, "Scheduler asset unavailable")
+        return FileResponse(path)
+
+    @app.post("/api/sponsors/zapier/{purchase_id}")
+    async def setup_reminder(purchase_id: str, x_demo_token: str | None = Header(default=None)):
+        authorize(x_demo_token)
+        hook = os.getenv("ZAPIER_SETUP_HOOK", "")
+        if payment_mode != "sandbox" or urlparse(hook).netloc != "hooks.zapier.com":
+            raise HTTPException(503, "Configure a Zapier Catch Hook in Sandbox mode")
+        with factory.begin() as db:
+            purchase = owned(db, purchase_id)
+            if purchase.status != "CAPTURED" or not purchase.provider_capture_id:
+                raise HTTPException(409, "A verified Sandbox capture is required")
+            event = {"event": "recording_kit_setup", "purchase_id": purchase_id,
+                     "capture_id": purchase.provider_capture_id}
+            operation = PaymentOperation(id=str(uuid4()), purchase_id=purchase_id, kind="SETUP_REMINDER",
+                request_id=str(uuid4()), body_digest=digest(event), state="DISPATCHED")
+            db.add(operation)
+            try:
+                db.flush()
+            except IntegrityError:
+                raise HTTPException(409, "Reminder already attempted. Check Zapier Task History before taking further action.") from None
+        await sponsors.request("POST", hook, body=event)
+        with factory.begin() as db:
+            stored = db.get(PaymentOperation, operation.id)
+            stored.state = "ACKNOWLEDGED"
+            record(db, purchase_id, "setup_webhook_acknowledged")
+        return {"status": "Webhook received. Check Zapier Task History for the action outcome."}
+
     def authorize(token: str | None) -> None:
         if not token or not hmac.compare_digest(token, demo_token):
             raise HTTPException(status_code=401, detail="Demo token required")
@@ -107,7 +170,8 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
 
     @app.get("/api/health")
     def health():
-        return {"status": "ok", "payment_mode": payment_mode, "ai_configured": bool(os.getenv("OPENAI_API_KEY"))}
+        return {"status": "ok", "payment_mode": payment_mode,
+                "ai_configured": bool(os.getenv("OPENAI_API_KEY")) or sponsors.settings("ASTROPODS_PLANNER_URL", "ASTROPODS_TOKEN")}
 
     @app.get("/api/catalogue")
     def get_catalogue():
@@ -159,8 +223,9 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
     async def plan(payload: InterpretRequest, x_demo_token: str | None = Header(default=None)):
         """Let AI propose catalogue items; the deterministic checker decides readiness."""
         authorize(x_demo_token)
-        if not os.getenv("OPENAI_API_KEY"):
-            raise HTTPException(status_code=503, detail="AI planning requires OPENAI_API_KEY; use the manual examples meanwhile")
+        hosted = sponsors.settings("ASTROPODS_PLANNER_URL", "ASTROPODS_TOKEN")
+        if not hosted and not os.getenv("OPENAI_API_KEY"):
+            raise HTTPException(status_code=503, detail="Configure OpenAI or the Astropods planner")
         from openai import AsyncOpenAI
 
         product_ids = [product["id"] for product in catalogue()]
@@ -179,6 +244,16 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
             "required": ["people", "budget_usd", "needs_confirmation", "selections"],
         }
         try:
+            if hosted:
+                planner_demo_token = os.getenv("ASTROPODS_PLANNER_DEMO_TOKEN")
+                hosted_result = await sponsors.payload("POST", os.environ["ASTROPODS_PLANNER_URL"],
+                    token=os.environ["ASTROPODS_TOKEN"],
+                    headers={"X-Demo-Token": planner_demo_token} if planner_demo_token else None,
+                    body={"text": payload.text})
+                configuration = Configuration.model_validate(hosted_result["proposal"])
+                return {"proposal": configuration.model_dump(), "check": evaluate(configuration),
+                        "needs_confirmation": True, "source": "astropods",
+                        "notice": "Astropods proposal. Review the requirements and kit."}
             client = AsyncOpenAI(timeout=20)
             result = await client.responses.create(
                 model=os.getenv("ASSEMBLY_AI_MODEL", "gpt-4.1-mini"),
@@ -220,6 +295,13 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
+    @app.post("/api/repair")
+    def suggest_repair(configuration: Configuration):
+        try:
+            return repair(configuration)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
     @app.post("/api/purchases")
     def create_purchase(payload: PurchaseRequest, x_demo_token: str | None = Header(default=None)):
         authorize(x_demo_token)
@@ -229,6 +311,8 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         if not result["ready"]:
             raise HTTPException(status_code=409, detail={"message": "Configuration has failures or unknown facts", "checks": result["checks"]})
+        if payload.expected_digest is not None and payload.expected_digest != result["digest"]:
+            raise HTTPException(status_code=409, detail="The checked terms changed. Run the check again.")
         with factory() as db:
             existing = db.scalar(select(Purchase).where(Purchase.actor_id == "demo", Purchase.intent_key == payload.intent_key))
             if existing:
@@ -242,11 +326,14 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
         try:
             with factory.begin() as db:
                 db.add(purchase)
+                db.flush()
                 record(db, purchase.id, "purchase_created", {"digest": result["digest"]})
         except IntegrityError:
             with factory() as db:
                 existing = db.scalar(select(Purchase).where(Purchase.actor_id == "demo", Purchase.intent_key == payload.intent_key))
-                if existing and existing.snapshot_digest == result["digest"]:
+                if existing is None:
+                    raise
+                if existing.snapshot_digest == result["digest"]:
                     return view(existing)
             raise HTTPException(status_code=409, detail="Intent key conflict")
         return view(purchase)
@@ -279,7 +366,7 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
             purchase.status = "ORDER_PENDING"
             purchase.approved_at = utcnow()
             operation = PaymentOperation(id=str(uuid4()), purchase_id=purchase.id, kind="CREATE",
-                request_id=f"assembly-create-{purchase.id}", body_digest=digest(purchase.snapshot), state="DISPATCHED")
+                request_id=str(uuid4()), body_digest=digest(purchase.snapshot), state="DISPATCHED")
             db.add(operation)
             record(db, purchase.id, "terms_approved", {"digest": purchase.snapshot_digest})
         # Provider call happens after the durable operation commit.
@@ -296,12 +383,17 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
             return JSONResponse(update_failure(purchase_id, "CREATE", True, str(exc)), status_code=202)
         except ProviderRejected as exc:
             return JSONResponse(update_failure(purchase_id, "CREATE", False, str(exc)), status_code=409)
-        if not order.id or order.status not in {"CREATED", "SAVED", "APPROVED"} or not order.approval_url:
+        if (not order.id or order.status not in {"CREATED", "SAVED", "APPROVED", "PAYER_ACTION_REQUIRED"}
+                or not order.approval_url):
             return JSONResponse(update_failure(purchase_id, "CREATE", True, "Unexpected PayPal create response"), status_code=202)
         if payment_mode == "sandbox":
-            from urllib.parse import urlparse
-            host = urlparse(order.approval_url).hostname or ""
-            if host not in {"www.sandbox.paypal.com", "sandbox.paypal.com"}:
+            try:
+                approval = urlparse(order.approval_url)
+                allowed = (approval.scheme == "https" and
+                           approval.netloc in {"www.sandbox.paypal.com", "sandbox.paypal.com"})
+            except ValueError:
+                allowed = False
+            if not allowed:
                 return JSONResponse(update_failure(purchase_id, "CREATE", True, "Unexpected PayPal approval URL"), status_code=202)
         with factory.begin() as db:
             purchase = locked(db, purchase_id)
@@ -357,7 +449,7 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
             if existing:
                 raise HTTPException(status_code=409, detail="Capture operation already exists; reconcile it")
             operation = PaymentOperation(id=str(uuid4()), purchase_id=purchase.id, kind="CAPTURE",
-                request_id=f"assembly-capture-{purchase.id}", body_digest=digest({"order": purchase.provider_order_id}),
+                request_id=str(uuid4()), body_digest=digest({"order": purchase.provider_order_id}),
                 state="DISPATCHED")
             db.add(operation)
             purchase.status = "CAPTURE_UNKNOWN"  # uncertain until verified, even if worker crashes here
@@ -429,7 +521,16 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
             rows = db.scalars(select(Purchase).where(Purchase.actor_id == "demo").order_by(Purchase.created_at.desc()).limit(20)).all()
             return [view(row) for row in rows]
 
-    static = Path(__file__).resolve().parent.parent / "web"
+    root = Path(__file__).resolve().parent.parent
+    grid_bundle = root / "node_modules" / "ag-grid-community" / "dist" / "ag-grid-community.min.js"
+
+    @app.get("/vendor/ag-grid-community.min.js", include_in_schema=False)
+    def repair_grid():
+        if not grid_bundle.is_file():
+            raise HTTPException(status_code=404, detail="Optional grid assets are not installed")
+        return FileResponse(grid_bundle, media_type="application/javascript")
+
+    static = root / "web"
     if static.is_dir():
         app.mount("/", StaticFiles(directory=static, html=True), name="web")
     return app
