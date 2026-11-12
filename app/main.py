@@ -26,8 +26,8 @@ from app.paypal import (MockPayPal, ProviderRejected, ProviderUncertain,
                         SandboxPayPal, verified_capture, verified_order_amount)
 from app.store import PaymentOperation, Purchase, make_session_factory, record, utcnow
 from app.counterexamples import run_configuration_cases
+from app.counterexample_runner import run_all_counterexamples
 from app import sponsors
-
 
 def aware(value: datetime) -> datetime:
     # SQLite removes timezone metadata; all stored timestamps originate in UTC.
@@ -144,10 +144,40 @@ def create_app(*, database_url: str | None = None, payment_mode: str | None = No
     def get_catalogue():
         return {"products": catalogue(), "notice": "Invented demo catalogue. PayPal Sandbox needs an owned seller account."}
 
+
+    @app.get("/api/products/search")
+    async def search_products(q: str = "", limit: int = 8):
+        query = q.strip()
+
+        if not query or len(query) > 200:
+            raise HTTPException(
+                422, "Search query must contain 1–200 characters"
+            )
+
+        if not 1 <= limit <= 10:
+            raise HTTPException(
+                422, "Limit must be between 1 and 10"
+            )
+
+        if not sponsors.settings("CHANNEL3_API_KEY"):
+            raise HTTPException(
+                503, "Channel3 API key is not configured"
+            )
+
+        products = await sponsors.channel3_search(query, limit)
+
+        return {
+            "source": "Channel3",
+            "products": products,
+        }
+
     @app.get("/api/examples")
     def examples():
         return {"broken": BROKEN_EXAMPLE.model_dump(), "repaired": REPAIRED_EXAMPLE.model_dump()}
 
+    @app.get("/api/counterexamples/all")
+    def get_all_counterexamples():
+        return run_all_counterexamples()
     @app.get("/api/counterexamples")
     def counterexamples():
         return {"cases": run_configuration_cases(),

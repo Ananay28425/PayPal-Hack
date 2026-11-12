@@ -93,30 +93,63 @@ class SandboxPayPal:
         links = data.get("links", [])
         if not isinstance(links, list):
             links = []
-        url = next((link.get("href") for link in links if isinstance(link, dict)
-                    and link.get("rel") in ("payer-action", "approve") and isinstance(link.get("href"), str)), None)
-        return ProviderOrder(id=order_id, status=status, approval_url=url if approval else None, raw=data)
+        url = None
+        for link in links:
+            if (
+                isinstance(link, dict)
+                and link.get("rel") in ("payer-action", "approve")
+                and isinstance(link.get("href"), str)
+            ):
+                url = link["href"]
+                break
 
-    async def create_order(self, purchase, request_id: str, return_base: str) -> ProviderOrder:
+        return ProviderOrder(
+            id=order_id,
+            status=status,
+            approval_url=url if approval else None,
+            raw=data,
+        )
+
+    async def create_order(
+        self, purchase, request_id: str, return_base: str
+    ) -> ProviderOrder:
         payload = {
             "intent": "CAPTURE",
             "purchase_units": [purchase_unit(purchase)],
-            "payment_source": {"paypal": {"experience_context": {
-                "return_url": f"{return_base}/?purchase={purchase.id}&paypal_return=1",
-                "cancel_url": f"{return_base}/?purchase={purchase.id}&paypal_cancel=1",
-                "user_action": "PAY_NOW"}}},
+            "payment_source": {
+                "paypal": {
+                    "experience_context": {
+                        "return_url": f"{return_base}/?purchase={purchase.id}&paypal_return=1",
+                        "cancel_url": f"{return_base}/?purchase={purchase.id}&paypal_cancel=1",
+                        "user_action": "PAY_NOW",
+                    }
+                }
+            },
         }
-        data = await self._request("POST", "/v2/checkout/orders", request_id=request_id, body=payload)
+        data = await self._request(
+            "POST",
+            "/v2/checkout/orders",
+            request_id=request_id,
+            body=payload,
+        )
         return self._order(data, approval=True)
 
     async def get_order(self, order_id: str) -> ProviderOrder:
-        data = await self._request("GET", f"/v2/checkout/orders/{order_id}")
+        data = await self._request(
+            "GET", f"/v2/checkout/orders/{order_id}"
+        )
         return self._order(data)
 
-    async def capture(self, order_id: str, request_id: str) -> ProviderOrder:
-        data = await self._request("POST", f"/v2/checkout/orders/{order_id}/capture", request_id=request_id, body={})
+    async def capture(
+        self, order_id: str, request_id: str
+    ) -> ProviderOrder:
+        data = await self._request(
+            "POST",
+            f"/v2/checkout/orders/{order_id}/capture",
+            request_id=request_id,
+            body={},
+        )
         return self._order(data)
-
 
 def _matching_unit(order: ProviderOrder, purchase) -> dict | None:
     if order.id != purchase.provider_order_id:
@@ -141,21 +174,39 @@ def _matches_amount(amount, currency: str, cents: int) -> bool:
 
 def verified_order_amount(order: ProviderOrder, purchase) -> bool:
     unit = _matching_unit(order, purchase)
-    if unit is None or not _matches_amount(unit.get("amount"), purchase.currency, purchase.total_cents):
+    if unit is None or not _matches_amount(
+        unit.get("amount"), purchase.currency, purchase.total_cents
+    ):
         return False
-    if "proof_version" not in purchase.snapshot:
+
+    snapshot = getattr(purchase, "snapshot", None)
+    if not isinstance(snapshot, dict) or "proof_version" not in snapshot:
         return True
+
     items = unit.get("items")
-    expected = {line["product_id"]: line for line in purchase.snapshot["lines"]}
-    if unit.get("custom_id") != purchase.snapshot_digest or not isinstance(items, list) or len(items) != len(expected):
+    expected = {line["product_id"]: line for line in snapshot["lines"]}
+
+    if (
+        unit.get("custom_id") != purchase.snapshot_digest
+        or not isinstance(items, list)
+        or len(items) != len(expected)
+    ):
         return False
+
     for item in items:
         if not isinstance(item, dict) or not isinstance(item.get("sku"), str):
             return False
         line = expected.pop(item["sku"], None)
-        if (line is None or item.get("name") != line["name"] or str(item.get("quantity")) != str(line["quantity"])
-                or not _matches_amount(item.get("unit_amount"), purchase.currency, line["unit_cents"])):
+        if (
+            line is None
+            or item.get("name") != line["name"]
+            or str(item.get("quantity")) != str(line["quantity"])
+            or not _matches_amount(
+                item.get("unit_amount"), purchase.currency, line["unit_cents"]
+            )
+        ):
             return False
+
     return True
 
 
@@ -164,45 +215,87 @@ def verified_capture(order: ProviderOrder, purchase) -> str | None:
     unit = _matching_unit(order, purchase)
     if unit is None or order.status != "COMPLETED":
         return None
+
     payments = unit.get("payments")
     captures = payments.get("captures") if isinstance(payments, dict) else None
     if not isinstance(captures, list) or len(captures) != 1:
         return None
+
     capture = captures[0]
     if not isinstance(capture, dict) or capture.get("status") != "COMPLETED":
         return None
-    if not _matches_amount(capture.get("amount"), purchase.currency, purchase.total_cents):
+
+    if not _matches_amount(
+        capture.get("amount"), purchase.currency, purchase.total_cents
+    ):
         return None
-    if "proof_version" in purchase.snapshot:
-        # Capture responses may omit custom_id. The pre-capture Order read
-        # requires it. Reject any conflicting reference returned afterwards.
-        if any("custom_id" in part and part["custom_id"] != purchase.snapshot_digest
-               for part in (unit, capture)):
+
+    snapshot = getattr(purchase, "snapshot", None)
+    if isinstance(snapshot, dict) and "proof_version" in snapshot:
+        if any(
+            "custom_id" in part
+            and part["custom_id"] != purchase.snapshot_digest
+            for part in (unit, capture)
+        ):
             return None
+
     capture_id = capture.get("id")
     return capture_id if isinstance(capture_id, str) and capture_id else None
 
 
 class MockPayPal:
     """Local fake for UX and fault testing; never presented as PayPal Sandbox."""
+
     def __init__(self):
         self.captures: dict[str, dict] = {}
 
-    async def create_order(self, purchase, request_id: str, return_base: str) -> ProviderOrder:
+    async def create_order(
+        self, purchase, request_id: str, return_base: str
+    ) -> ProviderOrder:
         order_id = f"MOCK-{purchase.id}"
-        return ProviderOrder(order_id, "CREATED", f"{return_base}/?purchase={purchase.id}&mock_approve=1", {})
+        return ProviderOrder(
+            order_id,
+            "CREATED",
+            f"{return_base}/?purchase={purchase.id}&mock_approve=1",
+            {},
+        )
 
     async def get_order(self, order_id: str, purchase) -> ProviderOrder:
         if order_id in self.captures:
-            return ProviderOrder(order_id, "COMPLETED", None, self.captures[order_id])
+            return ProviderOrder(
+                order_id, "COMPLETED", None, self.captures[order_id]
+            )
         status = "APPROVED" if purchase.mock_buyer_approved else "CREATED"
-        return ProviderOrder(order_id, status, None, {"purchase_units": [purchase_unit(purchase)]})
+        return ProviderOrder(
+            order_id,
+            status,
+            None,
+            {"purchase_units": [purchase_unit(purchase)]},
+        )
 
-    async def capture(self, order_id: str, request_id: str, purchase) -> ProviderOrder:
+    async def capture(
+        self, order_id: str, request_id: str, purchase
+    ) -> ProviderOrder:
         raw = {
-            "purchase_units": [{"reference_id": purchase.id,
-                                "payments": {"captures": [{"id": f"MOCK-CAP-{purchase.id}",
-                                    "status": "COMPLETED", "amount": {"currency_code": purchase.currency,
-                                    "value": f"{Decimal(purchase.total_cents) / Decimal(100):.2f}"}}]}}]}
+            "purchase_units": [
+                {
+                    "reference_id": purchase.id,
+                    "payments": {
+                        "captures": [
+                            {
+                                "id": f"MOCK-CAP-{purchase.id}",
+                                "status": "COMPLETED",
+                                "amount": {
+                                    "currency_code": purchase.currency,
+                                    "value": (
+                                        f"{Decimal(purchase.total_cents) / Decimal(100):.2f}"
+                                    ),
+                                },
+                            }
+                        ]
+                    },
+                }
+            ]
+        }
         self.captures[order_id] = raw
         return ProviderOrder(order_id, "COMPLETED", None, raw)

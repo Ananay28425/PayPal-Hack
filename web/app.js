@@ -1,8 +1,17 @@
 "use strict";
 
 const state = {
+  catalogue: [],
+  configuration: null,
+  check: null,
+  purchase: null,
+  mode: null,
+  revision: 0,
+  busy: false,
+  repairGrid: null
   inspection: "recording", catalogue: [], check: null, purchase: null, mode: null, revision: 0, busy: false, repairGrid: null
 };
+let counterexampleGridApi = null;
 let gridLibrary;
 const $ = id => document.getElementById(id);
 const token = () => $("token").value.trim();
@@ -242,6 +251,169 @@ function renderCatalogue() {
     row.append(info, quantity); root.append(row);
   }
 }
+
+
+function channel3Money(value, currency) {
+  if (value === null || value === undefined || value === "") {
+    return "Price not listed";
+  }
+
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) {
+    return `${String(value)}${currency ? " " + currency : ""}`;
+  }
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currency || "USD"
+    }).format(amount);
+  } catch {
+    return `${amount.toFixed(2)} ${currency || ""}`.trim();
+  }
+}
+
+function renderChannel3Products(products) {
+  const root = $("channel3-results");
+  root.replaceChildren();
+
+  if (!Array.isArray(products) || products.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty";
+    empty.textContent =
+      "No matching products were returned. Try a broader search.";
+    root.append(empty);
+    return;
+  }
+
+  for (const product of products) {
+    const card = document.createElement("article");
+    card.className = "channel3-card";
+
+    const imageUrl =
+      product.image_url ||
+      product.image ||
+      product.images?.[0]?.url ||
+      product.images?.[0]?.cleaned_url;
+
+    if (typeof imageUrl === "string" && /^https:\/\//i.test(imageUrl)) {
+      const image = document.createElement("img");
+      image.src = imageUrl;
+      image.alt = product.title
+        ? `${product.title} product image`
+        : "Product image";
+      image.loading = "lazy";
+      image.referrerPolicy = "no-referrer";
+      image.addEventListener("error", () => image.remove(), { once: true });
+      card.append(image);
+    }
+
+    const content = document.createElement("div");
+    content.className = "channel3-card-content";
+
+    const title = document.createElement("h4");
+    title.textContent = product.title || "Untitled product";
+    content.append(title);
+
+    if (product.description) {
+      const description = document.createElement("p");
+      description.textContent = product.description;
+      content.append(description);
+    }
+
+    const price = document.createElement("p");
+    price.className = "channel3-price";
+    price.textContent = product.price !== undefined
+      ? channel3Money(product.price, product.currency)
+      : "Price varies by offer";
+    content.append(price);
+
+    const offers = Array.isArray(product.offers) ? product.offers : [];
+
+    if (offers.length) {
+      const offerList = document.createElement("div");
+      offerList.className = "channel3-offers";
+
+      for (const offer of offers.slice(0, 3)) {
+        if (
+          !offer ||
+          typeof offer.url !== "string" ||
+          !/^https:\/\//i.test(offer.url)
+        ) continue;
+
+        const offerRow = document.createElement("div");
+        offerRow.className = "channel3-offer";
+
+        const merchant = document.createElement("span");
+        merchant.textContent = offer.domain || "Merchant offer";
+
+        const offerPrice = document.createElement("span");
+        offerPrice.textContent = offer.price !== undefined
+          ? channel3Money(offer.price, offer.currency || product.currency)
+          : (offer.availability || "View offer");
+
+        const link = document.createElement("a");
+        link.href = offer.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "VIEW OFFER ↗";
+
+        offerRow.append(merchant, offerPrice, link);
+        offerList.append(offerRow);
+      }
+
+      if (offerList.childElementCount) {
+        content.append(offerList);
+      }
+    }
+
+    card.append(content);
+    root.append(card);
+  }
+}
+
+async function searchChannel3(query) {
+  const status = $("channel3-status");
+  const button = $("channel3-search");
+  const cleaned = query.trim();
+
+  if (!cleaned || cleaned.length > 200) {
+    status.textContent = "Enter a search between 1 and 200 characters.";
+    return;
+  }
+
+  button.disabled = true;
+  status.textContent = "Searching Channel3…";
+  $("channel3-results").replaceChildren();
+
+  try {
+    const params = new URLSearchParams({
+      q: cleaned,
+      limit: "8"
+    });
+
+    const data = await api(
+      `/api/products/search?${params.toString()}`
+    );
+
+    renderChannel3Products(data.products);
+
+    status.textContent =
+      `${data.products.length} result${data.products.length === 1 ? "" : "s"} from ${data.source || "Channel3"}. Discovery results are not checkout-authoritative.`;
+
+  } catch (error) {
+    status.textContent =
+      `Channel3 search unavailable: ${error.message}`;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+$("channel3-search-form").addEventListener("submit", event => {
+  event.preventDefault();
+  searchChannel3($("channel3-query").value);
+});
+
 
 function renderCheck(result) {
   const root = $("result"); root.replaceChildren();
@@ -504,15 +676,64 @@ $("reconcile").addEventListener("click", () => action(async () => {
   toast(state.purchase.status === "CAPTURED" ? "Capture verified." : "No verified capture yet.");
 }));
 $("counterexamples").addEventListener("click", () => action(async () => {
-  const report = await api("/api/counterexamples");
-  const root = $("counterexample-results"); root.replaceChildren();
-  for (const item of report.cases) {
-    const row = document.createElement("p");
-    row.textContent = `${item.passed ? "PASS" : "FAIL"} · ${item.scenario} · ${JSON.stringify(item.observed)}`;
-    row.className = item.passed ? "case-pass" : "case-fail";
-    root.append(row);
+  const report = await api("/api/counterexamples/all");
+  const summaryRoot = $("counterexample-summary");
+  const gridRoot = $("counterexample-grid");
+
+  summaryRoot.replaceChildren();
+  if (counterexampleGridApi) {
+    counterexampleGridApi.destroy();
+    counterexampleGridApi = null;
   }
-  toast(`${report.cases.filter(item => item.passed).length}/${report.cases.length} independent expectations met.`);
+
+  const cases = report.cases || [];
+  const passed = cases.filter(item => item.passed).length;
+  const total = cases.length;
+  const failed = total - passed;
+
+  const badge = document.createElement("span");
+  badge.className = "pill " + (failed === 0 ? "pass" : "fail");
+  badge.textContent = `${passed}/${total} EXPECTATIONS MET`;
+
+  const description = document.createElement("span");
+  description.textContent = `${total} scenarios · ${failed} failed · Configuration + Payment Integrity`;
+  summaryRoot.append(badge, description);
+
+  // AG Grid 32's UMD build may expose the community module registry.
+  // Register once when available; otherwise the bundled legacy API can run directly.
+  if (agGrid.ModuleRegistry && agGrid.AllCommunityModule && !window.__assemblyAgGridRegistered) {
+    agGrid.ModuleRegistry.registerModules([agGrid.AllCommunityModule]);
+    window.__assemblyAgGridRegistered = true;
+  }
+
+  const columnDefs = [
+    { headerName: "SCENARIO", field: "scenario", minWidth: 210, flex: 1.5, filter: "agTextColumnFilter" },
+    { headerName: "CATEGORY", field: "category", minWidth: 170, flex: 1, filter: "agTextColumnFilter" },
+    { headerName: "EXPECTED", field: "expected", minWidth: 125, valueFormatter: params => JSON.stringify(params.value) },
+    { headerName: "OBSERVED", field: "observed", minWidth: 125, valueFormatter: params => JSON.stringify(params.value) },
+    {
+      headerName: "STATUS", colId: "status", minWidth: 105, maxWidth: 115,
+      valueGetter: params => params.data.passed ? "PASS" : "FAIL",
+      cellClassRules: {
+        "counterexample-status-pass": params => params.value === "PASS",
+        "counterexample-status-fail": params => params.value === "FAIL"
+      },
+      filter: "agTextColumnFilter"
+    },
+    { headerName: "RATIONALE", field: "rationale", minWidth: 260, flex: 2, filter: "agTextColumnFilter", wrapText: true, autoHeight: true }
+  ];
+
+  counterexampleGridApi = agGrid.createGrid(gridRoot, {
+    columnDefs,
+    rowData: cases,
+    defaultColDef: { sortable: true, resizable: true, filter: true, floatingFilter: true },
+    pagination: true,
+    paginationPageSize: 10,
+    paginationPageSizeSelector: [10, 20, 50],
+    animateRows: true
+  });
+
+  toast(`${passed}/${total} counterexample expectations met.`);
 }));
 
 (async () => {
